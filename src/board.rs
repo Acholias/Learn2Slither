@@ -6,14 +6,14 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:43:57 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/10 19:11:19 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/10 19:38:56 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use rand::Rng;
 use crate::snake::{Snake, spawn_snake};
 
-pub const   BOARD_SIZE: usize = 15;
+pub const   BOARD_SIZE: usize = 10;
 pub const   GREEN_APPLE_COUNT:  usize = 2;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -116,7 +116,7 @@ impl Board {
         if self.green_apples.contains(&next)
         {
             self.snake.advance(dir, true);
-            self.green_apples.retain(|&p| p != next); // Garde toutes les pommes vertes (sauf next)
+            self.green_apples.retain(|&p| p != next);
             let new_apple = self.randow_empty_cell();
             self.green_apples.push(new_apple);
             return StepResult::AteGreen;

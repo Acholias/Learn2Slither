@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/10 19:17:02 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/10 20:19:14 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,9 +15,11 @@ use macroquad::prelude::*;
 mod board;
 mod snake;
 mod display;
+mod state;
 
 use board::{Board, Direction, StepResult};
 use display::{draw_board, draw_game_over, window_size};
+use crate::state::{compute_state, print_state};
 
 fn window_conf() -> Conf
 {
@@ -67,6 +69,13 @@ async fn main()
         {
             queued_dir = Direction::Right;
             started = true;
+        }
+
+        if is_key_pressed(KeyCode::Space)
+        {
+            let s = compute_state(&board);
+            println!("State index = {}", s.to_index());
+            print_state(&board);
         }
 
         if !board.snake.alive
