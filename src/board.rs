@@ -6,14 +6,14 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:43:57 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/10 18:39:55 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/10 19:11:19 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use rand::Rng;
 use crate::snake::{Snake, spawn_snake};
 
-pub const   BOARD_SIZE: usize = 10;
+pub const   BOARD_SIZE: usize = 15;
 pub const   GREEN_APPLE_COUNT:  usize = 2;
 
 #[derive(Clone, Debug, PartialEq)]

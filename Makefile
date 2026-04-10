@@ -6,7 +6,7 @@
 #    By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/04/10 16:30:36 by lumugot           #+#    #+#              #
-#    Updated: 2026/04/10 16:33:02 by lumugot          ###   ########.fr        #
+#    Updated: 2026/04/10 19:09:08 by lumugot          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ run:
 	@cargo run -- $(ARGS)
 
 clean:
-	@cargo clean
+	@cargo clean -q
 
 fclean: clean
 	@rm -rf $(NAME)
