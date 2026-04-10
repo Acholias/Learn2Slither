@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:50:10 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/10 17:16:30 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/10 17:20:26 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -19,8 +19,7 @@ pub struct Snake {
     pub alive: bool,
 }
 
-impl Snake
-{
+impl Snake {
     pub fn new(body: Vec<(usize, usize)>, direction: Direction) -> Self
     {
         Snake { body, direction, alive: true, }
@@ -76,7 +75,7 @@ impl Snake
         }
     }
 
-    pub fn spaw_snake() -> Snake
+    pub fn spawn_snake() -> Snake
     {
         use rand::Rng;
         let mut rng = rand::thread_rng();
