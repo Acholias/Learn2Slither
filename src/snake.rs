@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:50:10 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/10 17:20:26 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/10 18:51:09 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -37,14 +37,14 @@ impl Snake {
 
     pub fn next_head(&self, dir: &Direction) -> (usize, usize)
     {
-        let (c, r) = self.head();
+        let (row, col) = self.head();
 
         match dir
         {
-            Direction::Up       => (r.wrapping_sub(1), c),
-            Direction::Down     => (r + 1, c),
-            Direction::Left     => (r, c.wrapping_sub(1)),
-            Direction::Right    => (r, c + 1),
+            Direction::Up       => (row.wrapping_sub(1), col),
+            Direction::Down     => (row + 1, col),
+            Direction::Left     => (row, col.wrapping_sub(1)),
+            Direction::Right    => (row, col + 1),
         }
     }
 
@@ -74,21 +74,21 @@ impl Snake {
             self.body.pop().unwrap()
         }
     }
+}
 
-    pub fn spawn_snake() -> Snake
-    {
-        use rand::Rng;
-        let mut rng = rand::thread_rng();
+pub fn spawn_snake() -> Snake
+{
+    use rand::Rng;
+    let mut rng = rand::thread_rng();
 
-        let row = rng.gen_range(1..BOARD_SIZE - 1);
-        let col = rng.gen_range(2..BOARD_SIZE - 1);
+    let row = rng.gen_range(1..BOARD_SIZE - 1);
+    let col = rng.gen_range(2..BOARD_SIZE - 1);
 
-        let body = vec! [
-            (row, col)
-            (row, col - 1)
-            (row, col - 2)
-        ];
+    let body = vec! [
+        (row, col),
+        (row, col - 1),
+        (row, col - 2),
+    ];
     
-        Snake::new(body, Direction::Right)
-    }
+    Snake::new(body, Direction::Right)
 }

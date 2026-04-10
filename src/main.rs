@@ -1,7 +1,8 @@
-mod board;
+mod display;
 mod snake;
+mod board;
 
 fn main()
 {
-    println!("Welcome on Learn2Slither project !");
+    println!("Learn2Slither !!");
 }
