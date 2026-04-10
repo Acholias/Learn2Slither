@@ -1,0 +1,18 @@
+[package]
+name = "Learn2Slither"
+version = "1.0.0"
+edition = "2024"
+
+[[bin]]
+name = "snake"
+path= "src/main.rs"
+
+[dependencies]
+macroquad = "0.4"
+serde = { version = "1", features = ["derives"] }
+serde_json= "1"
+clap = { version = "4", features = ["derive"] }
+rand = "0.8"
+
+[profile.release]
+opt-level = 3
