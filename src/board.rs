@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:43:57 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/10 17:36:14 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/10 18:13:10 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -84,5 +84,57 @@ impl Board {
     fn is_occupied(&self, pos: (usize, usize)) -> bool
     {
         self.snake.occupies(pos) || self.green_apples.contains(&pos) || self.red_apples == pos
+    }
+
+    pub fn get_cell(&self, row: usize, col: usize) -> Cell
+    {
+        let pos= (row, col);
+
+        if pos == self.snake.head() { Cell::SnakeHead }
+        else if self.snake.occupies_body(pos) { Cell::SnakeBody }
+        else if self.green_apples.contains(&pos) { Cell::GreenApple }
+        else if self.red_apples == pos { Cell::RedApple }
+        else { Cell::Empty }
+    }
+
+    pub fn step(&mut self, dir: Direction) -> StepResult
+    {
+        let next = self.snake.next_head(&dir);
+
+        if next.0 >= self.size || next.1 >= self.size
+        {
+            self.snake.alive = false;
+            return StepResult::GameOver;
+        }
+
+        if self.snake.occupies_body(next)
+        {
+            self.snake.alive = false;
+            return StepResult::GameOver;
+        }
+
+        if self.green_apples.contains(&next)
+        {
+            self.snake.advance(dir, true);
+            self.green_apples.retain(|&p| p != next); // Garde toutes les pommes vertes (sauf next)
+            let new_apple = self.randow_empty_cell();
+            self.green_apples.push(new_apple);
+            return StepResult::AteGreen;
+        }
+
+        if self.red_apples == next
+        {
+            self.snake.advance(dir, false);
+            self.snake.body.pop();
+            if self.snake.lenght() == 0
+            {
+                self.snake.alive = false;
+                return StepResult::GameOver;
+            }
+            self.red_apples = self.randow_empty_cell();
+            return StepResult::AteRed;
+        }
+        self.snake.advance(dir, false);
+        StepResult::Moved
     }
 }
