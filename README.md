@@ -1,6 +1,6 @@
 # Learn2Slither
 
-[French version / Version francaise](README.fr.md)
+[French version](README.fr.md)
 
 Learn2Slither is a small Snake game written in Rust with a graphical interface powered by Macroquad.
 
