@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 13:21:37 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/12 13:31:01 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -17,6 +17,7 @@ mod snake;
 mod display;
 mod state;
 mod action;
+mod rewards;
 
 use board::{Board, Direction, StepResult};
 use display::{draw_board, draw_game_over, window_size};
