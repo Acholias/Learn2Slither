@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:45:43 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/10 20:22:27 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/12 13:20:25 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -146,4 +146,3 @@ pub fn print_state(board: &Board)
     println!("  Left : {}", left);
     println!("  Right: {}", right);
 }
-
