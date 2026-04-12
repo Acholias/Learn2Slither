@@ -6,16 +6,16 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/12 13:30:41 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 13:35:09 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/12 16:40:44 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use crate::board::StepResult;
 
-pub const REWARD_GREEN: f32     = 1.0;
-pub const REWARD_RED: f32       = -1.0;
+pub const REWARD_GREEN: f32     = 2.0;
+pub const REWARD_RED: f32       = -3.0;
 pub const REWARD_MOVE: f32      = -0.01;
-pub const REWARD_GAME_OVER: f32 = -1.0;
+pub const REWARD_GAME_OVER: f32 = -10.0;
 
 pub fn compute_reward(result: &StepResult) -> f32
 {

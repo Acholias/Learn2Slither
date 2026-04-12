@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/12 13:50:36 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 14:11:45 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/12 16:46:12 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -26,6 +26,8 @@ pub struct Agent {
     pub epsilon: f32,
     pub epsilon_min: f32,
     pub epsilon_decay: f32,
+    pub exploitation_frequence: i32,
+    pub generation: i32,
 }
 
 impl Agent {
@@ -34,10 +36,12 @@ impl Agent {
         Agent {
             q_table: vec![[0.0; ACTION_COUNT]; STATE_COUNT],
             alpha: 0.1,
-            gamma: 0.99,
+            gamma: 0.90,
             epsilon: 1.0,
-            epsilon_min: 0.01,
-            epsilon_decay: 0.995,
+            epsilon_min: 0.2,
+            epsilon_decay: 0.998,
+            exploitation_frequence: 10,
+            generation: 0,
         }
     }
 
@@ -56,7 +60,7 @@ impl Agent {
 
         let eps = if dontlearn { 0.0 } else { self.epsilon };
 
-        if rng.gen::<f32>() < eps
+        if rng.gen::<f32>() < eps && (self.generation % self.exploitation_frequence != 0)
         {
             let index = rng.gen_range(0..ACTION_COUNT);
             Action::ALL[index]
@@ -92,5 +96,11 @@ impl Agent {
         {
             self.epsilon *= self.epsilon_decay;
         }
+    }
+
+    pub fn next_gen(&mut self)
+    {
+        println!("{} {}", self.generation, self.epsilon);
+        self.generation += 1;
     }
 }

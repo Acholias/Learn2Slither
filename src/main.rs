@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 14:40:13 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/12 16:47:07 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -54,7 +54,7 @@ async fn main()
     }
 
     let mut board = Board::new();
-    let speed: f64 = 0.15;
+    let speed: f64 = 0.03;
     let mut last_step = get_time();
     let mut queued_dir = board.snake.direction.clone();
     let mut started = false;
@@ -107,6 +107,7 @@ async fn main()
             if use_ai
             {
                 episode_count += 1;
+                agent.next_gen();
                 println!(
                     "AI episode {} finished. Final length = {}",
                     episode_count,
