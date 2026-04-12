@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 16:47:07 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/12 18:17:14 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,8 +27,6 @@ use board::{Board, Direction, StepResult};
 use display::{draw_board, draw_game_over, window_size};
 use crate::state::{compute_state, print_state};
 use crate::train::train_basic;
-use crate::agent::Agent;
-use crate::rewards::compute_reward;
 
 fn window_conf() -> Conf
 {
@@ -45,27 +43,30 @@ fn window_conf() -> Conf
 #[macroquad::main(window_conf)]
 async fn main()
 {
-    let run_training = false;
-
-    if run_training
-    {
-        let _agent = train_basic(10);
-        return;
-    }
+    let pretrain_episodes = 10000;
+    let mut agent = train_basic(pretrain_episodes);
+    println!("Pre-training done on {} episodes", pretrain_episodes);
 
     let mut board = Board::new();
-    let speed: f64 = 0.03;
+    let mut speed: f64 = 0.001;
     let mut last_step = get_time();
     let mut queued_dir = board.snake.direction.clone();
     let mut started = false;
     let mut use_ai = false;
-    let mut agent = Agent::new();
     let mut rng = thread_rng();
     let mut episode_count: u64 = 0;
+    let mut best_length: usize = 0;
+    let mut total_length: u64 = 0;
+    let mut steps_since_food: u32 = 0;
+    let no_food_max: u32 = 150;
 
     loop
     {
         if is_key_pressed(KeyCode::Escape) { break; }
+
+        if is_key_pressed(KeyCode::KpSubtract) { speed = speed - 0.001; }
+        
+        if is_key_pressed(KeyCode::KpAdd) { speed = speed + 0.001; }
 
         if is_key_pressed(KeyCode::Up)
         {
@@ -107,15 +108,17 @@ async fn main()
             if use_ai
             {
                 episode_count += 1;
-                agent.next_gen();
+                let final_len = board.snake.lenght() as u64;
+                total_length += final_len;
                 println!(
                     "AI episode {} finished. Final length = {}",
                     episode_count,
-                    board.snake.lenght()
+                    final_len
                 );
                 board = Board::new();
                 queued_dir = board.snake.direction.clone();
                 last_step = get_time();
+                steps_since_food = 0;
                 started = true;
                 continue;
             }
@@ -141,14 +144,9 @@ async fn main()
             let result = if use_ai
             {
                 let state = compute_state(&board);
-                let action = agent.select_action(&state, false, &mut rng);
+                let action = agent.select_action(&state, true, &mut rng);
                 let dir = action.to_direction();
-                let step_res = board.step(dir);
-                let reward = compute_reward(&step_res);
-                let next_state = compute_state(&board);
-                let done = matches!(step_res, StepResult::GameOver);
-                agent.update(&state, &action, reward, &next_state, done);
-                step_res
+                board.step(dir)
             }
             else
             {
@@ -157,16 +155,32 @@ async fn main()
 
             match result
             {
-                StepResult::AteGreen => {
-                    println!("Ate green apple! Length: {}", board.snake.lenght());
-                }
-                StepResult::AteRed => {
-                    println!("Ate red apple! Length: {}", board.snake.lenght());
-                }
                 StepResult::GameOver => {
                     println!("Game over! Final length: {}", board.snake.lenght());
                 }
                 StepResult::Moved => {}
+                StepResult::AteGreen => {
+                    steps_since_food = 0;
+                }
+                StepResult::AteRed => {
+                    steps_since_food = 0;
+                }
+            }
+
+            if use_ai
+            {
+                steps_since_food += 1;
+                if steps_since_food >= no_food_max
+                {
+                    board.snake.alive = false;
+                }
+            }
+
+            let current_len = board.snake.lenght();
+            if current_len > best_length
+            {
+                best_length = current_len;
+                println!("New length record: {}", best_length);
             }
         }
 
@@ -177,8 +191,9 @@ async fn main()
             draw_text(text, 20.0, screen_height() - 10.0, 20.0, YELLOW);
             if use_ai
             {
-                let epi_text = format!("Episodes: {}", episode_count);
-                draw_text(&epi_text, 20.0, 30.0, 24.0, WHITE);
+                let avg = if episode_count > 0 { total_length as f32 / episode_count as f32 } else { 0.0 };
+                let hud = format!("Episodes: {} | Record: {} | avg lenght: {:.2}", episode_count, best_length, avg);
+                draw_text(&hud, 20.0, 30.0, 24.0, WHITE);
             }
             next_frame().await;
             continue;
@@ -187,8 +202,9 @@ async fn main()
         draw_board(&board);
         if use_ai
         {
-            let epi_text = format!("Episodes: {}", episode_count);
-            draw_text(&epi_text, 20.0, 30.0, 24.0, WHITE);
+            let avg = if episode_count > 0 { total_length as f32 / episode_count as f32 } else { 0.0 };
+            let hud = format!("Ep: {} | PR: {} | Avg: {:.2}  | Speed: {:.3}", episode_count, best_length, avg, speed);
+            draw_text(&hud, 30.0, 30.0, 24.0, WHITE);
         }
         next_frame().await;
     }

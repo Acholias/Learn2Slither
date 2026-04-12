@@ -124,13 +124,18 @@ impl Board {
 
         if self.red_apples == next
         {
-            self.snake.advance(dir, false);
-            self.snake.body.pop();
-            if self.snake.lenght() == 0
+            if self.snake.lenght() <= 1
             {
+                // Snake would shrink to length 0: treat as game over without
+                // actually emptying the body to keep state computations safe.
                 self.snake.alive = false;
                 return StepResult::GameOver;
             }
+
+            self.snake.advance(dir, false);
+            // Remove one additional segment to effectively shrink the snake.
+            self.snake.body.pop();
+
             self.red_apples = self.randow_empty_cell();
             return StepResult::AteRed;
         }

@@ -14,7 +14,7 @@ use crate::board::StepResult;
 
 pub const REWARD_GREEN: f32     = 2.0;
 pub const REWARD_RED: f32       = -3.0;
-pub const REWARD_MOVE: f32      = -0.01;
+pub const REWARD_MOVE: f32      = -0.05;
 pub const REWARD_GAME_OVER: f32 = -10.0;
 
 pub fn compute_reward(result: &StepResult) -> f32

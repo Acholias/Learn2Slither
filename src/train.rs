@@ -1,5 +1,16 @@
-use ::rand::thread_rng;
+// ************************************************************************** //
+//                                                                            //
+//                                                        :::      ::::::::   //
+//   train.rs                                           :+:      :+:    :+:   //
+//                                                    +:+ +:+         +:+     //
+//   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
+//                                                +#+#+#+#+#+   +#+           //
+//   Created: 2026/04/12 17:16:48 by lumugot           #+#    #+#             //
+//   Updated: 2026/04/12 17:21:34 by lumugot          ###   ########.fr       //
+//                                                                            //
+// ************************************************************************** //
 
+use ::rand::thread_rng;
 use crate::agent::Agent;
 use crate::env::Env;
 
@@ -8,6 +19,7 @@ pub fn train_basic(sessions: u32) -> Agent
     let mut env = Env::new();
     let mut agent = Agent::new();
     let mut rng = thread_rng();
+	let max_steps: u32 = 200;
 
     for episode in 0..sessions {
         let mut state = env.reset();
@@ -30,9 +42,7 @@ pub fn train_basic(sessions: u32) -> Agent
             done = next_done;
             steps += 1;
 
-            if steps > 1000 {
-                break;
-            }
+	        if steps >= max_steps { break ;}
         }
 
         println!(

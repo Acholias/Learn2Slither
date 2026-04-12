@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/12 13:50:36 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 16:46:12 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/12 17:12:54 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use crate::action::Action;
 use crate::state::State;
 
-const STATE_COUNT: usize = 5 * 5 * 5 * 5;
+const STATE_COUNT: usize = 256; // 8 boolean features -> 2^8 states
 const ACTION_COUNT: usize = 4;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -26,8 +26,6 @@ pub struct Agent {
     pub epsilon: f32,
     pub epsilon_min: f32,
     pub epsilon_decay: f32,
-    pub exploitation_frequence: i32,
-    pub generation: i32,
 }
 
 impl Agent {
@@ -36,12 +34,10 @@ impl Agent {
         Agent {
             q_table: vec![[0.0; ACTION_COUNT]; STATE_COUNT],
             alpha: 0.1,
-            gamma: 0.90,
+            gamma: 0.95,
             epsilon: 1.0,
-            epsilon_min: 0.2,
-            epsilon_decay: 0.998,
-            exploitation_frequence: 10,
-            generation: 0,
+            epsilon_min: 0.05,
+            epsilon_decay: 0.999,
         }
     }
 
@@ -60,7 +56,7 @@ impl Agent {
 
         let eps = if dontlearn { 0.0 } else { self.epsilon };
 
-        if rng.gen::<f32>() < eps && (self.generation % self.exploitation_frequence != 0)
+        if rng.gen::<f32>() < eps
         {
             let index = rng.gen_range(0..ACTION_COUNT);
             Action::ALL[index]
@@ -96,11 +92,5 @@ impl Agent {
         {
             self.epsilon *= self.epsilon_decay;
         }
-    }
-
-    pub fn next_gen(&mut self)
-    {
-        println!("{} {}", self.generation, self.epsilon);
-        self.generation += 1;
     }
 }

@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:45:43 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 13:20:25 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/12 17:35:53 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,82 +14,64 @@ use serde::{Deserialize, Serialize};
 use crate::board::{Board, Cell, Direction};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub enum VisionCell {
-    Wall,
-    Body,
-    GreenApple,
-    RedApple,
-    Empty,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct State {
-    pub up: VisionCell,
-    pub down: VisionCell,
-    pub left: VisionCell,
-    pub right: VisionCell,
+    pub danger_up: bool,
+    pub danger_down: bool,
+    pub danger_left: bool,
+    pub danger_right: bool,
+    pub apple_up: bool,
+    pub apple_down: bool,
+    pub apple_left: bool,
+    pub apple_right: bool,
 }
 
 impl State {
     pub fn to_index(&self) -> usize
     {
-        fn encode(c: VisionCell) -> usize
-        {
-            match c
-            {
-                VisionCell::Wall        => 0,
-                VisionCell::Body        => 1,
-                VisionCell::GreenApple  => 2,
-                VisionCell::RedApple    => 3,
-                VisionCell::Empty       => 4,
-            }
-        }
-        let b0 = encode(self.up);
-        let b1 = encode(self.down);
-        let b2 = encode(self.left);
-        let b3 = encode(self.right);
-        
-        (((b0 * 5 + b1) * 5 + b2) * 5) + b3
+        let mut idx = 0usize;
+        if self.danger_up    { idx |= 1 << 0; }
+        if self.danger_down  { idx |= 1 << 1; }
+        if self.danger_left  { idx |= 1 << 2; }
+        if self.danger_right { idx |= 1 << 3; }
+        if self.apple_up     { idx |= 1 << 4; }
+        if self.apple_down   { idx |= 1 << 5; }
+        if self.apple_left   { idx |= 1 << 6; }
+        if self.apple_right  { idx |= 1 << 7; }
+        idx
     }
 }
 
 pub fn compute_state(board: &Board) -> State
 {
-    let (row, col) = board.snake.head();
-    let up = first_visible_in_direction(board, row, col, Direction::Up);
-    let down = first_visible_in_direction(board, row, col, Direction::Down);
-    let left = first_visible_in_direction(board, row, col, Direction::Left);
-    let right = first_visible_in_direction(board, row, col, Direction::Right);
-
-    State { up, down, left, right }
+    State {
+        danger_up:    is_danger(board, &Direction::Up),
+        danger_down:  is_danger(board, &Direction::Down),
+        danger_left:  is_danger(board, &Direction::Left),
+        danger_right: is_danger(board, &Direction::Right),
+        apple_up:     apple_visible(board, &Direction::Up),
+        apple_down:   apple_visible(board, &Direction::Down),
+        apple_left:   apple_visible(board, &Direction::Left),
+        apple_right:  apple_visible(board, &Direction::Right),
+    }
 }
 
-fn first_visible_in_direction(board: &Board, row: usize, col: usize, dir: Direction) -> VisionCell
+fn is_danger(board: &Board, dir: &Direction) -> bool
 {
-    let size = board.size as isize;
-    let mut r = row as isize;
-    let mut c = col as isize;
+    let next = board.snake.next_head(dir);
+    if next.0 >= board.size || next.1 >= board.size { return true; }
+    if board.snake.occupies_body(next) { return true; }
+    false
+}
 
-    loop
+fn apple_visible(board: &Board, dir: &Direction) -> bool
+{
+    let (hr, hc) = board.snake.head();
+    match dir
     {
-        match dir
-        {
-            Direction::Up       => r -= 1,
-            Direction::Down     => r += 1,
-            Direction::Left     => c -= 1,
-            Direction::Right    => c += 1,
-        }
-        
-        if r < 0 || c < 0 || r >= size || c >= size { return VisionCell::Wall; }
-        let cell = board.get_cell(r as usize, c as usize);
-        
-        match cell
-        {
-            Cell::SnakeHead | Cell::SnakeBody   => return VisionCell::Body,
-            Cell::GreenApple                    => return VisionCell::GreenApple,
-            Cell::RedApple                      => return VisionCell::RedApple,
-            Cell::Empty                         => {}
-        }
+        Direction::Up => board.green_apples.iter().any(|&(r, c)| c == hc && r < hr),
+        Direction::Down => board.green_apples.iter().any(|&(r, c)| c == hc && r > hr),
+        Direction::Left => board.green_apples.iter().any(|&(r, c)| r == hr && c < hc),
+        Direction::Right => board.green_apples.iter().any(|&(r, c)| r == hr && c > hc),
     }
 }
 
@@ -98,7 +80,7 @@ fn ray_string(board: &Board, row: usize, col: usize, dir: Direction) -> String
     let size = board.size as isize;
     let mut r = row as isize;
     let mut c = col as isize;
-   
+	
     let mut out = String::new();
 
     loop
@@ -110,7 +92,7 @@ fn ray_string(board: &Board, row: usize, col: usize, dir: Direction) -> String
             Direction::Left     => c -= 1,
             Direction::Right    => c += 1,
         }
-        
+		
         if r < 0 || c < 0 || r >= size || c >= size
         {
             out.push('W');
