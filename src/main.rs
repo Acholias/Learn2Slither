@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 18:17:14 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/12 18:46:41 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -64,10 +64,10 @@ async fn main()
     {
         if is_key_pressed(KeyCode::Escape) { break; }
 
-        if is_key_pressed(KeyCode::KpSubtract) { speed = speed - 0.001; }
+        if is_key_pressed(KeyCode::KpSubtract) { speed = 0.05; }
         
-        if is_key_pressed(KeyCode::KpAdd) { speed = speed + 0.001; }
-
+        if is_key_pressed(KeyCode::KpAdd) { speed = 0.0001; }
+        
         if is_key_pressed(KeyCode::Up)
         {
             queued_dir = Direction::Up;
@@ -203,7 +203,7 @@ async fn main()
         if use_ai
         {
             let avg = if episode_count > 0 { total_length as f32 / episode_count as f32 } else { 0.0 };
-            let hud = format!("Ep: {} | PR: {} | Avg: {:.2}  | Speed: {:.3}", episode_count, best_length, avg, speed);
+            let hud = format!("Ep: {} | PR: {} | Avg: {:.2}  | Speed: {:.4}", episode_count, best_length, avg, speed);
             draw_text(&hud, 30.0, 30.0, 24.0, WHITE);
         }
         next_frame().await;
