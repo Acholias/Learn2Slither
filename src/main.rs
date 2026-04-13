@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/13 16:51:38 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/13 17:04:37 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -124,17 +124,13 @@ async fn main()
                 episode_count += 1;
                 let final_len = board.snake.lenght() as u64;
                 total_length += final_len;
-                println!(
-                    "AI episode {} finished. Final length = {}",
-                    episode_count,
-                    final_len
-                );
+                println!("AI episode {} finished. Final length = {}", episode_count, final_len);
                 board = Board::new();
                 queued_dir = board.snake.direction.clone();
                 last_step = get_time();
                 steps_since_food = 0;
                 started = true;
-                continue;
+                continue ;
             }
             else
             {
@@ -196,12 +192,15 @@ async fn main()
         {
             let text = "Press arrows to play, ENTER = AI, SPACE = debug";
             draw_board(&board);
-            draw_text(text, 20.0, screen_height() - 10.0, 20.0, YELLOW);
+            let avg = if episode_count > 0 { total_length as f32 / episode_count as f32 } else { 0.0 };
+            let hud = format!("Ep: {} | PR: {} | Avg: {:.2}  | Speed: {}", episode_count, best_length, avg, speed_msg);
+            draw_text(&hud, 200.0, 30.0, 24.0, WHITE);
+            draw_text(text, 20.0, screen_height() - 10.0, 25.0, RED);
             if use_ai
             {
                 let avg = if episode_count > 0 { total_length as f32 / episode_count as f32 } else { 0.0 };
-                let hud = format!("Episodes: {} | Record: {} | avg lenght: {:.2}", episode_count, best_length, avg);
-                draw_text(&hud, 20.0, 30.0, 24.0, WHITE);
+                let hud = format!("Ep: {} | PR: {} | Avg: {:.2}  | Speed: {}", episode_count, best_length, avg, speed_msg);
+                draw_text(&hud, 200.0, 30.0, 24.0, WHITE);
             }
             next_frame().await;
             continue;
@@ -212,7 +211,7 @@ async fn main()
         {
             let avg = if episode_count > 0 { total_length as f32 / episode_count as f32 } else { 0.0 };
             let hud = format!("Ep: {} | PR: {} | Avg: {:.2}  | Speed: {}", episode_count, best_length, avg, speed_msg);
-            draw_text(&hud, 40.0, 30.0, 24.0, WHITE);
+            draw_text(&hud, 200.0, 30.0, 24.0, WHITE);
         }
         next_frame().await;
     }
