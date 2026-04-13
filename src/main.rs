@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 18:46:41 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/13 16:51:38 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -22,6 +22,7 @@ mod rewards;
 mod env;
 mod agent;
 mod train;
+mod key_manager;
 
 use board::{Board, Direction, StepResult};
 use display::{draw_board, draw_game_over, window_size};
@@ -43,12 +44,10 @@ fn window_conf() -> Conf
 #[macroquad::main(window_conf)]
 async fn main()
 {
-    let pretrain_episodes = 10000;
-    let mut agent = train_basic(pretrain_episodes);
-    println!("Pre-training done on {} episodes", pretrain_episodes);
+    let mut agent = train_basic(25000);
 
     let mut board = Board::new();
-    let mut speed: f64 = 0.001;
+    let mut speed: f64 = 0.1;
     let mut last_step = get_time();
     let mut queued_dir = board.snake.direction.clone();
     let mut started = false;
@@ -58,15 +57,30 @@ async fn main()
     let mut best_length: usize = 0;
     let mut total_length: u64 = 0;
     let mut steps_since_food: u32 = 0;
-    let no_food_max: u32 = 150;
+    let no_food_max: u32 = 100;
+    let mut speed_msg = String::from("");
 
     loop
     {
         if is_key_pressed(KeyCode::Escape) { break; }
 
-        if is_key_pressed(KeyCode::KpSubtract) { speed = 0.05; }
+        if is_key_pressed(KeyCode::KpSubtract)
+        {
+            speed = 0.05;
+            speed_msg = String::from("MIN SPEED IA");
+        }
         
-        if is_key_pressed(KeyCode::KpAdd) { speed = 0.0001; }
+        if is_key_pressed(KeyCode::KpAdd)
+        { 
+            speed = 0.0001;
+            speed_msg = String::from("MAX SPEED IA");
+        }
+        
+        if is_key_pressed(KeyCode::Backspace)
+        {
+            speed = 0.1;
+            speed_msg = String::from("SPEED FOR PLAYER");
+        }
         
         if is_key_pressed(KeyCode::Up)
         {
@@ -155,16 +169,10 @@ async fn main()
 
             match result
             {
-                StepResult::GameOver => {
-                    println!("Game over! Final length: {}", board.snake.lenght());
-                }
+                StepResult::GameOver => { println!("Game over! Final length: {}", board.snake.lenght()); }
                 StepResult::Moved => {}
-                StepResult::AteGreen => {
-                    steps_since_food = 0;
-                }
-                StepResult::AteRed => {
-                    steps_since_food = 0;
-                }
+                StepResult::AteGreen => { steps_since_food = 0; }
+                StepResult::AteRed => { steps_since_food = 0; }
             }
 
             if use_ai
@@ -203,8 +211,8 @@ async fn main()
         if use_ai
         {
             let avg = if episode_count > 0 { total_length as f32 / episode_count as f32 } else { 0.0 };
-            let hud = format!("Ep: {} | PR: {} | Avg: {:.2}  | Speed: {:.4}", episode_count, best_length, avg, speed);
-            draw_text(&hud, 30.0, 30.0, 24.0, WHITE);
+            let hud = format!("Ep: {} | PR: {} | Avg: {:.2}  | Speed: {}", episode_count, best_length, avg, speed_msg);
+            draw_text(&hud, 40.0, 30.0, 24.0, WHITE);
         }
         next_frame().await;
     }

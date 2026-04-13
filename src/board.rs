@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:43:57 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/10 19:38:56 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/13 13:45:29 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -126,14 +126,11 @@ impl Board {
         {
             if self.snake.lenght() <= 1
             {
-                // Snake would shrink to length 0: treat as game over without
-                // actually emptying the body to keep state computations safe.
                 self.snake.alive = false;
                 return StepResult::GameOver;
             }
 
             self.snake.advance(dir, false);
-            // Remove one additional segment to effectively shrink the snake.
             self.snake.body.pop();
 
             self.red_apples = self.randow_empty_cell();

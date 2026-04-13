@@ -6,15 +6,15 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 18:15:37 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/10 18:35:21 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/13 16:51:01 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use macroquad::prelude::*;
 use crate::board::{Board, Cell, BOARD_SIZE};
 
-const   CELL_SIZE: f32  = 50.0;
-const   MARGIN: f32     = 20.0;
+const   CELL_SIZE: f32  = 80.0;
+const   MARGIN: f32     = 50.0;
 
 const COLOR_BG: Color           = Color::new(0.12, 0.12, 0.12, 1.0);
 const COLOR_GRID: Color         = Color::new(0.2,  0.2,  0.2,  1.0);

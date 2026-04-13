@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/12 13:50:36 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 17:12:54 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/13 15:06:28 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use crate::action::Action;
 use crate::state::State;
 
-const STATE_COUNT: usize = 256; // 8 boolean features -> 2^8 states
+const STATE_COUNT: usize = 256;
 const ACTION_COUNT: usize = 4;
 
 #[derive(Debug, Serialize, Deserialize)]
