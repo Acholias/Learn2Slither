@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/12 13:21:27 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/13 16:45:03 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/16 00:25:27 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -35,7 +35,6 @@ impl Action {
         }
     }
     
-    #[allow(dead_code)]
     pub fn from_direction(dir: &Direction) -> Self
     {
         match dir 

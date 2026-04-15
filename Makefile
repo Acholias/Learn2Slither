@@ -6,7 +6,7 @@
 #    By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/04/10 16:30:36 by lumugot           #+#    #+#              #
-#    Updated: 2026/04/13 16:14:17 by lumugot          ###   ########.fr        #
+#    Updated: 2026/04/16 00:26:03 by lumugot          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,6 +27,9 @@ clean:
 fclean: clean
 	@rm -rf $(NAME)
 
+purge:
+	@rm -rf model.json 
+
 re : fclean all
 
-.PHONY: all build run clean fclean
+.PHONY: all build run clean fclean purge re

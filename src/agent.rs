@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/12 13:50:36 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/15 10:53:31 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/15 23:53:52 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,6 +14,10 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use crate::action::Action;
 use crate::state::State;
+use std::fs::{create_dir_all, File};
+use std::io::{BufReader, BufWriter};
+use std::path::Path;
+
 
 const STATE_COUNT: usize = 256;
 const ACTION_COUNT: usize = 4;
@@ -92,5 +96,35 @@ impl Agent {
         {
             self.epsilon *= self.epsilon_decay;
         }
+    }
+
+    pub fn save_to_file(&self, path: &str) -> Result<(), String>
+    {
+        let path_ref = Path::new(path);
+
+        if let Some(parent) = path_ref.parent()
+        {
+            if !parent.as_os_str().is_empty()
+            {
+                create_dir_all(parent).map_err(|e| format!("Failed to create model directory: {}", e))?;
+            }
+        }
+
+        let file = File::create(path_ref).map_err(|e| format!("Failed to create model file: {}", e))?;
+   
+        let writer = BufWriter::new(file);
+
+        serde_json::to_writer(writer, self).map_err(|e| format!("Failed to serialize model: {}", e))?;
+
+        Ok(())
+    }
+
+    pub fn load_from_file(path: &str) -> Result<Self, String>
+    {
+        let file = File::open(path).map_err(|e| format!("Failed to open model file: {}", e))?;
+
+        let reader = BufReader::new(file);
+
+        serde_json::from_reader(reader).map_err(|e| format!("Failed to deserialize model: {}", e))
     }
 }
