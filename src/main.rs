@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/13 17:04:37 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/15 23:35:03 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -23,11 +23,13 @@ mod env;
 mod agent;
 mod train;
 mod key_manager;
+mod cli;
 
 use board::{Board, Direction, StepResult};
 use display::{draw_board, draw_game_over, window_size};
 use crate::state::{compute_state, print_state};
 use crate::train::train_basic;
+use cli::{Cli, Mode};
 
 fn window_conf() -> Conf
 {
@@ -44,7 +46,9 @@ fn window_conf() -> Conf
 #[macroquad::main(window_conf)]
 async fn main()
 {
-    let mut agent = train_basic(25000);
+    let args = Cli::parse_args();
+
+    let mut agent = train_basic(args.sessions);
 
     let mut board = Board::new();
     let mut speed: f64 = 0.1;

@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:50:10 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 17:06:56 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/15 11:03:59 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -84,11 +84,7 @@ pub fn spawn_snake() -> Snake
     let row = rng.gen_range(1..BOARD_SIZE - 1);
     let col = rng.gen_range(2..BOARD_SIZE - 1);
 
-    let body = vec! [
-        (row, col),
-        (row, col - 1),
-        (row, col - 2),
-    ];
+    let body = vec! [(row, col), (row, col - 1), (row, col - 2)];
     
     Snake::new(body, Direction::Right)
 }
