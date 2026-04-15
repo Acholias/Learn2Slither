@@ -1,32 +1,34 @@
 // ************************************************************************** //
 //                                                                            //
 //                                                        :::      ::::::::   //
-//   main.rs                                            :+:      :+:    :+:   //
+//   app.rs                                             :+:      :+:    :+:   //
 //                                                    +:+ +:+         +:+     //
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
-//   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/16 00:56:14 by lumugot          ###   ########.fr       //
+//   Created: 2026/04/16 00:56:05 by lumugot           #+#    #+#             //
+//   Updated: 2026/04/16 01:00:35 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
-use crate::key_manager::handle_keys;
+use crate::agent::Agent;
+use crate::cli::{Cli, Mode};
+use crate::game_loop::run_visual_loop;
+use crate::train::{train_basic, train_from_agent};
+use std::path::Path;
 
-mod	key_manager;
-mod app;
-
- #[macroquad::main(window_conf)]
-async fn main()
+pub async fn run(args: Cli)
 {
-	let args = Cli::parse_args();
-
-	let agent= match build_agent(&args)
-	{
+	let agent = match build_agent(&args) {
 		Some(agent)	=> agent,
 		None		=> return,
 	};
 
 	if !args.visual { return ; }
 
-	run_visual_loop(agent &args).await;
+	run_visual_loop(agent, &args).await;
+}
+
+fn build_agent(args: &Cli) -> Option<Agent>
+{
+
 }
