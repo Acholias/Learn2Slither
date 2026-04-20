@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/20 22:28:41 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/20 22:45:43 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -274,4 +274,107 @@ fn save_if_requested(agent: &Agent, model: Option<&str>) -> bool
 			false
 		}
 	}
+}
+
+// Visual loop
+async fn run_visual_loop(mut agent: Agent, args: &Cli)
+{
+	let mut runtime = Runtime::new(args.mode);
+	let mut stats = Stats::default();
+	let dontmlearn_now = matches!(args.mode, Mode::Predict) || args.dontlearn;
+	let mut rng = thread_rng();
+
+	loop
+	{
+		if	is_key_pressed(KeyCode::Escape) { break ; }
+	
+		handle_speed_keys(&mut runtime);
+		handle_direction_keys(&mut runtime);
+		handle_ai_toggle_key(&mut runtime);
+		handle_debug_key(&runtime.board);
+
+		if handle_dead_state(&mut runtime, &mut stats)
+		{
+			next_frame().await;
+			continue ;
+		}
+
+		if runtime.started && can_tick(args, &runtime)
+		{
+			apply_tick(&mut runtime, &mut agent, &mut stats, dontmlearn_now, args, &mut rng);
+		}
+
+		draw_frame(&runtime, &stats);
+		next_frame().await;
+	}
+}
+
+fn handle_speed_keys(runtime: &mut Runtime)
+{
+	if is_key_pressed(KeyCode::KpSubtract)
+	{	
+		runtime.set_ai_speed_min();
+		println!("{}[SPEED]{} {}", ANSI_YELLOW, ANSI_RESET, runtime.speed_label);
+	}
+
+	if is_key_pressed(KeyCode::KpAdd)
+	{
+		runtime.set_ai_speed_max();
+		println!("{}[SPEED]{} {}", ANSI_YELLOW, ANSI_RESET, runtime.speed_label);
+	}
+
+	if is_key_pressed(KeyCode::Backspace)
+	{
+	runtime.set_player_speed();
+        println!("{}[SPEED]{} {}", ANSI_YELLOW, ANSI_RESET, runtime.speed_label);
+	}
+}
+
+fn handle_direction_keys(runtime: &mut Runtime)
+{
+	if is_key_pressed(KeyCode::Up)
+	{
+		runtime.queued_dir = Direction::Up;
+		runtime.started = true;
+	}
+
+	if is_key_pressed(KeyCode::Down)
+	{
+		runtime.queued_dir = Direction::Down;
+		runtime.started = true;
+	}
+
+	if is_key_pressed(KeyCode::Left)
+	{
+		runtime.queued_dir = Direction::Left;
+		runtime.started = true;
+	}
+
+	if is_key_pressed(KeyCode::Right)
+	{
+		runtime.queued_dir = Direction::Right;
+		runtime.started = true;
+	}
+}
+
+fn handle_ai_toggle_key(runtime: &mut Runtime)
+{
+	if !is_key_pressed(KeyCode::Enter) { return ; }
+
+	runtime.use_ai = !runtime.use_ai;
+	runtime.started = true;
+
+	if runtime.use_ai { runtime.set_ai_speed_max(); } 
+	else { runtime.set_player_speed(); }
+
+    println!("{}[MODE]{} AI {}", ANSI_CYAN, ANSI_RESET, if runtime.use_ai { "ON" } else { "OFF" });
+}
+
+fn handle_debug_key(board: &Board)
+{
+	if !is_key_pressed(KeyCode::Space) { return ; }
+
+	let state = compute_state(board);
+	println!("{}[DEBUG]{} State index = {}", ANSI_CYAN, ANSI_RESET, state.to_index());
+	print_state(board);
 }
