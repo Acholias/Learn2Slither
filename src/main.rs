@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/21 00:38:50 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/21 00:57:01 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -91,6 +91,7 @@ struct Runtime {
 	board:	Board,
 	queued_dir:	Direction,
 	started: bool,
+	paused: bool,
 	use_ai:	bool,
 	speed: f64,
 	speed_label: &'static str,
@@ -98,6 +99,7 @@ struct Runtime {
 	steps_since_food: u32,
 	show_vision: bool,
 	show_logs: bool,
+	show_help: bool,
 }
 
 fn log(runtime: &Runtime, message: impl std::fmt::Display)
@@ -120,7 +122,8 @@ impl Runtime {
 		{
 			board,
 			queued_dir,
-			started: use_ai,
+			started: false,
+			paused: false,
 			use_ai,
 			speed: SPEED_PLAYER,
 			speed_label: "SPEED FOR PLAYER",
@@ -128,6 +131,7 @@ impl Runtime {
 			steps_since_food: 0,
 			show_vision: false,
 			show_logs: false,
+			show_help: true,
 		};
 
 		if use_ai { rt.set_ai_speed_min(); }
@@ -144,6 +148,8 @@ impl Runtime {
 		self.last_step= get_time();
 		self.steps_since_food = 0;
 		self.started = started;
+		self.paused = false;
+		self.show_help = true;
 	}
 
 	fn set_ai_speed_max(&mut self)
@@ -311,8 +317,9 @@ async fn run_visual_loop(mut agent: Agent, args: &Cli)
 		if is_key_pressed(KeyCode::Escape) { break ; }
 	
 		handle_speed_keys(&mut runtime);
+		handle_mode_toggle_key(&mut runtime);
 		handle_direction_keys(&mut runtime);
-		handle_ai_toggle_key(&mut runtime);
+		handle_enter_key(&mut runtime);
 		handle_debug_key(&mut runtime);
 
 		if handle_dead_state(&mut runtime, &mut stats)
@@ -321,7 +328,7 @@ async fn run_visual_loop(mut agent: Agent, args: &Cli)
 			continue ;
 		}
 
-		if runtime.started && can_tick(args, &runtime)
+		if runtime.started && !runtime.paused && can_tick(args, &runtime)
 		{
 			apply_tick(&mut runtime, &mut agent, &mut stats, dontmlearn_now, args, &mut rng);
 		}
@@ -354,42 +361,74 @@ fn handle_speed_keys(runtime: &mut Runtime)
 
 fn handle_direction_keys(runtime: &mut Runtime)
 {
+	if runtime.use_ai { return ; }
+
 	if is_key_pressed(KeyCode::Up)
 	{
 		runtime.queued_dir = Direction::Up;
-		runtime.started = true;
+		if !runtime.started
+		{
+			runtime.started = true;
+			runtime.paused = false;
+		}
 	}
 
 	if is_key_pressed(KeyCode::Down)
 	{
 		runtime.queued_dir = Direction::Down;
-		runtime.started = true;
+		if !runtime.started
+		{
+			runtime.started = true;
+			runtime.paused = false;
+		}
 	}
 
 	if is_key_pressed(KeyCode::Left)
 	{
 		runtime.queued_dir = Direction::Left;
-		runtime.started = true;
+		if !runtime.started
+		{
+			runtime.started = true;
+			runtime.paused = false;
+		}
 	}
 
 	if is_key_pressed(KeyCode::Right)
 	{
 		runtime.queued_dir = Direction::Right;
-		runtime.started = true;
+		if !runtime.started
+		{
+			runtime.started = true;
+			runtime.paused = false;
+		}
 	}
 }
 
-fn handle_ai_toggle_key(runtime: &mut Runtime)
+fn handle_mode_toggle_key(runtime: &mut Runtime)
 {
-	if !is_key_pressed(KeyCode::Enter) { return ; }
+	if runtime.started { return ; }
+	if !is_key_pressed(KeyCode::Tab) { return ; }
 
 	runtime.use_ai = !runtime.use_ai;
-	runtime.started = true;
 
 	if runtime.use_ai { runtime.set_ai_speed_min(); } 
 	else { runtime.set_player_speed(); }
 
 	log(runtime, format!("{}[MODE]{} AI {}", ANSI_CYAN, ANSI_RESET, if runtime.use_ai { "ON" } else { "OFF" }));
+}
+
+fn handle_enter_key(runtime: &mut Runtime)
+{
+	if !is_key_pressed(KeyCode::Enter) { return ; }
+
+	if !runtime.started
+	{
+		runtime.started = true;
+		runtime.paused = false;
+		return ;
+	}
+
+	runtime.paused = !runtime.paused;
 }
 
 fn handle_debug_key(runtime: &mut Runtime)
@@ -402,6 +441,11 @@ fn handle_debug_key(runtime: &mut Runtime)
 	if is_key_pressed(KeyCode::D)
 	{
 		runtime.show_logs = !runtime.show_logs;
+	}
+
+	if is_key_pressed(KeyCode::H)
+	{
+		runtime.show_help = !runtime.show_help;
 	}
 }
 
@@ -494,15 +538,9 @@ fn draw_frame(runtime: &Runtime, stats: &Stats)
 		draw_vision_overlay(&runtime.board);
 	}
 
-	if runtime.use_ai || !runtime.started || !runtime.use_ai
-	{
-		draw_hud(runtime, stats);
-	}
-
-	if !runtime.started
-	{
-		draw_start_hint();
-	}
+	draw_hud(runtime, stats);
+	draw_mode_status(runtime);
+	draw_help_menu(runtime);
 }
 
 fn draw_hud(runtime: &Runtime, stats: &Stats)
@@ -518,16 +556,45 @@ fn draw_hud(runtime: &Runtime, stats: &Stats)
 	draw_text(&format!("Speed: {}", runtime.speed_label), x, y, fs, WHITE);
 }
 
-fn draw_start_hint()
+fn draw_mode_status(runtime: &Runtime)
 {
-	let x = panel_left_x() + panel_padding();
-	let fs = 30.0;
-	let line = 34.0;
-	let vision_lines = 5.0;
-	let vision_top_y = screen_height() - panel_padding() - (vision_lines - 1.0) * line;
-	let y = vision_top_y - 14.0;
+	let fs= 26.0;
+	let pad	 = panel_padding();
 
-	draw_text("Arrows: move | ENTER: AI | D: logs | SPACE: vision", x, y, fs, RED);
+	let text = if runtime.use_ai { "IA: ON" } else { "IA: OFF" };
+	let dims= measure_text(text, None, fs as u16, 1.0);
+
+	let x = screen_width() - pad - dims.width;
+	let y = screen_height() - pad;
+
+	let color = if runtime.use_ai { GREEN } else { WHITE };
+	draw_text(text, x, y, fs, color);
+}
+
+fn draw_help_menu(runtime: &Runtime)
+{
+	if !runtime.show_help { return ; }
+
+	let fs = 22.0;
+	let line = 26.0;
+	let pad = panel_padding();
+
+	let x = panel_left_x() + pad;
+	let w = screen_width() - x - pad;
+
+	let h = 7.0 * line + 8.0;
+	let y = screen_height() - pad - h;
+
+	draw_rectangle(x - 10.0, y - 22.0, w + 20.0, h + 70.0, Color::new(0.0, 0.0, 0.0, 0.75));
+
+	let mut ty = y;
+	draw_text("CONTROLS (H to close)", x, ty, fs, WHITE); ty += line;
+	draw_text("TAB    : toggle AI (before start)", x, ty, fs, WHITE); ty += line;
+	draw_text("ENTER  : start / pause", x, ty, fs, WHITE); ty += line;
+	draw_text("ARROWS : start+move (Player)", x, ty, fs, WHITE); ty += line;
+	draw_text("SPACE  : vision", x, ty, fs, WHITE); ty += line;
+	draw_text("D      : logs", x, ty, fs, WHITE); ty += line;
+	draw_text("ESC    : quit", x, ty, fs, WHITE);
 }
 
 fn draw_vision_overlay(board: &Board)
