@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/20 23:24:01 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/21 00:21:20 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,9 +27,9 @@ mod key_manager;
 mod cli;
 
 use board::{Board, Direction, StepResult};
-use display::{draw_board, draw_game_over, window_size};
+use display::{draw_board, draw_game_over, panel_left_x, panel_padding, window_size};
 use crate::agent::Agent;
-use crate::state::{compute_state, print_state};
+use crate::state::{compute_state, compute_vision};
 use crate::train::{train_basic, train_from_agent};
 use cli::{Cli, Mode};
 
@@ -43,6 +43,16 @@ const ANSI_GREEN: &str	= "\x1b[32m";
 const ANSI_CYAN: &str	= "\x1b[36m";
 const ANSI_YELLOW: &str	= "\x1b[33m";
 const ANSI_RED: &str	= "\x1b[31m";
+
+fn log_plain(message: impl std::fmt::Display)
+{
+	println!("{}", message);
+}
+
+fn log_err_plain(message: impl std::fmt::Display)
+{
+	eprintln!("{}", message);
+}
 
 
 // State board/snake and player
@@ -65,7 +75,7 @@ impl Stats {
 		if current_length > self.best_lenght
 		{
 			self.best_lenght= current_length;
-			println!("{}[RECORD]{} New length record: {}", ANSI_GREEN, ANSI_RESET, self.best_lenght);
+			log_plain(format!("{}[RECORD]{} New length record: {}", ANSI_GREEN, ANSI_RESET, self.best_lenght));
 		}
 	}
 
@@ -73,7 +83,7 @@ impl Stats {
 	{
 		self.episode_count += 1;
 		self.total_length += final_length as u64;
-		println!("{}[EPISODE]{} #{} finished. Final lenght = {}", ANSI_CYAN, ANSI_RESET, self.episode_count, final_length);
+		log_plain(format!("{}[EPISODE]{} #{} finished. Final lenght = {}", ANSI_CYAN, ANSI_RESET, self.episode_count, final_length));
 	}
 }
 
@@ -86,8 +96,17 @@ struct Runtime {
 	speed_label: &'static str,
 	last_step: f64,
 	steps_since_food: u32,
+	show_vision: bool,
+	show_logs: bool,
 }
 
+fn log(runtime: &Runtime, message: impl std::fmt::Display)
+{
+	if runtime.show_logs
+	{
+		log_plain(message);
+	}
+}
 
 // Visual loop state
 impl Runtime {
@@ -107,9 +126,13 @@ impl Runtime {
 			speed_label: "SPEED FOR PLAYER",
 			last_step: get_time(),
 			steps_since_food: 0,
+			show_vision: false,
+			show_logs: false,
 		};
 
-		if use_ai { rt.set_ai_speed_max(); }
+		if use_ai { rt.set_ai_speed_min(); }
+	
+		else { rt.set_player_speed(); }
 	
 		rt
 	}
@@ -215,7 +238,7 @@ fn required_model_path(model: Option<&str>) -> Option<&str>
 		Some(path) => Some(path),
 		None =>
 		{
-			eprintln!("{}[ERROR]{} --model is required in predict mode", ANSI_RED, ANSI_RESET);
+			log_err_plain(format!("{}[ERROR]{} --model is required in predict mode", ANSI_RED, ANSI_RESET));
 			None
 		}
 	}
@@ -242,12 +265,12 @@ fn load_agent(path: &str) -> Option<Agent>
 	{
 		Ok(agent) =>
 		{
-			println!("{}[LOAD]{} Model loaded from {}", ANSI_GREEN, ANSI_RESET, path);
+			log_plain(format!("{}[LOAD]{} Model loaded from {}", ANSI_GREEN, ANSI_RESET, path));
 			Some(agent)
 		}
 		Err(error) =>
 		{
-			eprintln!("{}[ERROR]{} Load model failed: {}", ANSI_RED, ANSI_RESET, error);
+			log_err_plain(format!("{}[ERROR]{} Load model failed: {}", ANSI_RED, ANSI_RESET, error));
 			None
 		}
 	}
@@ -264,12 +287,12 @@ fn save_if_requested(agent: &Agent, model: Option<&str>) -> bool
 	{
 		Ok(_) =>
 		{
-			println!("{}[SAVE]{} Model saved to {}", ANSI_GREEN, ANSI_RESET, path);
+			log_plain(format!("{}[SAVE]{} Model saved to {}", ANSI_GREEN, ANSI_RESET, path));
 			true
 		}
 		Err(error) =>
 		{
-			eprintln!("{}[ERROR]{} Save model failed: {}", ANSI_RED, ANSI_RESET, error);
+			log_err_plain(format!("{}[ERROR]{} Save model failed: {}", ANSI_RED, ANSI_RESET, error));
 			false
 		}
 	}
@@ -290,7 +313,7 @@ async fn run_visual_loop(mut agent: Agent, args: &Cli)
 		handle_speed_keys(&mut runtime);
 		handle_direction_keys(&mut runtime);
 		handle_ai_toggle_key(&mut runtime);
-		handle_debug_key(&runtime.board);
+		handle_debug_key(&mut runtime);
 
 		if handle_dead_state(&mut runtime, &mut stats)
 		{
@@ -313,19 +336,19 @@ fn handle_speed_keys(runtime: &mut Runtime)
 	if is_key_pressed(KeyCode::KpSubtract)
 	{	
 		runtime.set_ai_speed_min();
-		println!("{}[SPEED]{} {}", ANSI_YELLOW, ANSI_RESET, runtime.speed_label);
+		log(runtime, format!("{}[SPEED]{} {}", ANSI_YELLOW, ANSI_RESET, runtime.speed_label));
 	}
 
 	if is_key_pressed(KeyCode::KpAdd)
 	{
 		runtime.set_ai_speed_max();
-		println!("{}[SPEED]{} {}", ANSI_YELLOW, ANSI_RESET, runtime.speed_label);
+		log(runtime, format!("{}[SPEED]{} {}", ANSI_YELLOW, ANSI_RESET, runtime.speed_label));
 	}
 
 	if is_key_pressed(KeyCode::Backspace)
 	{
-	runtime.set_player_speed();
-        println!("{}[SPEED]{} {}", ANSI_YELLOW, ANSI_RESET, runtime.speed_label);
+		runtime.set_player_speed();
+		log(runtime, format!("{}[SPEED]{} {}", ANSI_YELLOW, ANSI_RESET, runtime.speed_label));
 	}
 }
 
@@ -366,16 +389,20 @@ fn handle_ai_toggle_key(runtime: &mut Runtime)
 	if runtime.use_ai { runtime.set_ai_speed_max(); } 
 	else { runtime.set_player_speed(); }
 
-    println!("{}[MODE]{} AI {}", ANSI_CYAN, ANSI_RESET, if runtime.use_ai { "ON" } else { "OFF" });
+	log(runtime, format!("{}[MODE]{} AI {}", ANSI_CYAN, ANSI_RESET, if runtime.use_ai { "ON" } else { "OFF" }));
 }
 
-fn handle_debug_key(board: &Board)
+fn handle_debug_key(runtime: &mut Runtime)
 {
-	if !is_key_pressed(KeyCode::Space) { return ; }
+	if is_key_pressed(KeyCode::Space)
+	{
+		runtime.show_vision = !runtime.show_vision;
+	}
 
-	let state = compute_state(board);
-	println!("{}[DEBUG]{} State index = {}", ANSI_CYAN, ANSI_RESET, state.to_index());
-	print_state(board);
+	if is_key_pressed(KeyCode::D)
+	{
+		runtime.show_logs = !runtime.show_logs;
+	}
 }
 
 // Game state transitions
@@ -409,7 +436,6 @@ fn apply_tick(runtime: &mut Runtime, agent: &mut Agent, stats: &mut Stats,
 	dontlearn_now: bool, args: &Cli, rng: &mut impl ::rand::Rng)
 {
 	if !(args.step && runtime.use_ai) { runtime.last_step = get_time(); }
-
 	let result = if runtime.use_ai { tick_ai(runtime, agent, dontlearn_now, rng) }
 	else { tick_player(runtime) };
 
@@ -435,7 +461,7 @@ fn update_after_step(runtime: &mut Runtime, stats: &mut Stats, result: StepResul
 	{
 		StepResult::GameOver =>
 		{
-			println!("{}[GAME OVER]{} Final length: {}", ANSI_RED, ANSI_RESET, runtime.board.snake.lenght());
+			log(runtime, format!("{}[GAME OVER]{} Final length: {}", ANSI_RED, ANSI_RESET, runtime.board.snake.lenght()));
 		}
 
 		StepResult::AteGreen | StepResult::AteRed =>
@@ -463,7 +489,12 @@ fn draw_frame(runtime: &Runtime, stats: &Stats)
 {
 	draw_board(&runtime.board);
 
-	if runtime.use_ai || !runtime.started
+	if runtime.show_vision
+	{
+		draw_vision_overlay(&runtime.board);
+	}
+
+	if runtime.use_ai || !runtime.started || !runtime.use_ai
 	{
 		draw_hud(runtime, stats);
 	}
@@ -476,18 +507,42 @@ fn draw_frame(runtime: &Runtime, stats: &Stats)
 
 fn draw_hud(runtime: &Runtime, stats: &Stats)
 {
-	let hud = format!("Ep: {} | PR: {} | Avg: {:.2}  | Speed: {}", 
-		stats.episode_count,
-		stats.best_lenght,
-		stats.average(),
-		runtime.speed_label);
+	let x = panel_left_x() + panel_padding();
+	let mut y = 30.0;
+	let fs = 24.0;
+	let line = 28.0;
 
-	draw_text(&hud, 200.0, 30.0, 24.0, WHITE);
+	draw_text(&format!("Ep   : {}", stats.episode_count), x, y, fs, WHITE); y += line;
+	draw_text(&format!("PR   : {}", stats.best_lenght), x, y, fs, WHITE); y += line;
+	draw_text(&format!("Avg  : {:.2}", stats.average()), x, y, fs, WHITE); y += line;
+	draw_text(&format!("Speed: {}", runtime.speed_label), x, y, fs, WHITE);
 }
 
 fn draw_start_hint()
 {
-	let text = "Press arrows to play, ENTER = AI, SPACE = debug";
+	let x = panel_left_x() + panel_padding();
+	let fs = 20.0;
+	let line = 22.0;
+	let vision_lines = 5.0;
+	let vision_top_y = screen_height() - panel_padding() - (vision_lines - 1.0) * line;
+	let y = vision_top_y - 14.0;
 
-	draw_text(text, 20.0, screen_height() - 10.0, 25.0, RED);
+	draw_text("Arrows: move | ENTER: AI | D: logs | SPACE: vision", x, y, fs, RED);
+}
+
+fn draw_vision_overlay(board: &Board)
+{
+	let v = compute_vision(board);
+
+	let x = panel_left_x() + panel_padding();
+	let fs = 20.0;
+	let line = 22.0;
+	let lines = 5.0;
+	let mut y = screen_height() - panel_padding() - (lines - 30.0) * line;
+
+	draw_text(&format!("Head : ({}, {})", v.head.0, v.head.1), x, y, fs, WHITE); y += line;
+	draw_text(&format!("Up   : {}", v.up), x, y, fs, WHITE); y += line;
+	draw_text(&format!("Down : {}", v.down), x, y, fs, WHITE); y += line;
+	draw_text(&format!("Left : {}", v.left), x, y, fs, WHITE); y += line;
+	draw_text(&format!("Right: {}", v.right), x, y, fs, WHITE);
 }

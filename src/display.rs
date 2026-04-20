@@ -16,6 +16,9 @@ use crate::board::{Board, Cell, BOARD_SIZE};
 const   CELL_SIZE: f32  = 80.0;
 const   MARGIN: f32     = 50.0;
 
+const PANEL_WIDTH: f32 = 420.0;
+const PANEL_PADDING: f32 = 20.0;
+
 const COLOR_BG: Color           = Color::new(0.12, 0.12, 0.12, 1.0);
 const COLOR_GRID: Color         = Color::new(0.2,  0.2,  0.2,  1.0);
 const COLOR_SNAKE_HEAD: Color   = Color::new(0.2,  0.6,  1.0,  1.0);
@@ -25,8 +28,24 @@ const COLOR_RED_APPLE: Color    = Color::new(0.9,  0.2,  0.2,  1.0);
 
 pub fn window_size() -> (f32, f32)
 {
-    let size = BOARD_SIZE as f32 * CELL_SIZE + MARGIN* 2.0;
-    (size, size + 40.0)
+    let board_px = BOARD_SIZE as f32 * CELL_SIZE;
+    let board_area = board_px + MARGIN * 2.0;
+
+    let w = board_area + PANEL_WIDTH;
+    let h = board_area + 40.0;
+
+    (w, h)
+}
+
+pub fn panel_left_x() -> f32
+{
+    let board_px = BOARD_SIZE as f32 * CELL_SIZE;
+    MARGIN + board_px + MARGIN
+}
+
+pub fn panel_padding() -> f32
+{
+    PANEL_PADDING
 }
 
 fn  cell_to_pixel(row: usize, col: usize) -> (f32, f32)
@@ -63,9 +82,9 @@ pub fn draw_board(board: &Board)
         );
     }
 
-    for row in 0..=BOARD_SIZE
+    for row in 0..BOARD_SIZE
     {
-        for col in 0..=BOARD_SIZE
+        for col in 0..BOARD_SIZE
         {
             let cell = board.get_cell(row, col);
             let color = match cell

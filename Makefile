@@ -6,13 +6,16 @@
 #    By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/04/10 16:30:36 by lumugot           #+#    #+#              #
-#    Updated: 2026/04/16 00:26:03 by lumugot          ###   ########.fr        #
+#    Updated: 2026/04/21 00:10:36 by lumugot          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = snake
 
 all: build
+
+check:
+	@cargo check
 
 build:
 	@cargo build --release
@@ -28,7 +31,7 @@ fclean: clean
 	@rm -rf $(NAME)
 
 purge:
-	@rm -rf model.json 
+	@rm -rf models
 
 re : fclean all
 

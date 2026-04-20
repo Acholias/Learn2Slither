@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:45:43 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 17:35:53 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/20 23:48:22 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -23,6 +23,15 @@ pub struct State {
     pub apple_down: bool,
     pub apple_left: bool,
     pub apple_right: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct Vision {
+	pub head: (usize, usize),
+	pub up: String,
+	pub down: String,
+	pub left: String,
+	pub right: String,
 }
 
 impl State {
@@ -112,19 +121,16 @@ fn ray_string(board: &Board, row: usize, col: usize, dir: Direction) -> String
     out
 }
 
-pub fn print_state(board: &Board)
+pub fn compute_vision(board: &Board) -> Vision
 {
-    let (row, col) = board.snake.head();
+	let (row, col) = board.snake.head();
 
-    let up = ray_string(board, row, col, Direction::Up);
-    let down = ray_string(board, row, col, Direction::Down);
-    let left = ray_string(board, row, col, Direction::Left);
-    let right = ray_string(board, row, col, Direction::Right);
-
-    println!("Snake head at ({}, {})", row, col);
-    println!("Vision (W/H/S/G/R/0):");
-    println!("  Up   : {}", up);
-    println!("  Down : {}", down);
-    println!("  Left : {}", left);
-    println!("  Right: {}", right);
+	Vision
+	{
+		head: (row, col),
+		up: ray_string(board, row, col, Direction::Up),
+		down: ray_string(board, row, col, Direction::Down),
+		left: ray_string(board, row, col, Direction::Left),
+		right: ray_string(board, row, col, Direction::Right),
+	}
 }
