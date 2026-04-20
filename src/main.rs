@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/20 22:45:43 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/20 23:00:35 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -378,3 +378,79 @@ fn handle_debug_key(board: &Board)
 	println!("{}[DEBUG]{} State index = {}", ANSI_CYAN, ANSI_RESET, state.to_index());
 	print_state(board);
 }
+
+// Game state transitions
+fn handle_dead_state(runtime: &mut Runtime, stats: &mut Stats) -> bool
+{
+	if runtime.board.snake.alive { return false; }
+
+	if runtime.use_ai
+	{
+		let final_length = runtime.board.snake.lenght();
+		stats.close_ai_episode(final_length);
+		runtime.reset_board(true);
+		return true;
+	}
+
+	draw_game_over(&runtime.board);
+
+	if is_key_pressed(KeyCode::R) { runtime.reset_board(false); }
+
+	true
+}
+
+fn apply_tick(runtime: &mut Runtime, agent: &mut Agent, stats: &mut Stats, 
+	dontlearn_now: bool, args: &Cli, rng: &mut impl ::rand::Rng)
+{
+	if !(args.step && runtime.use_ai) { runtime.last_step = get_time(); }
+
+	let result = if runtime.use_ai { tick_ai(runtime, agent, dontlearn_now, rng) }
+	else { tick_player(runtime) };
+
+	update_after_step(runtime, stats, result);	
+}
+
+fn tick_ai(runtime: &mut Runtime, agent: &mut Agent, dontlearn_now: bool, rng: &mut impl ::rand::Rng) -> StepResult
+{
+	let state = compute_state(&runtime.board);
+	let action= agent.select_action(&state, dontlearn_now, rng);
+	
+	runtime.board.step(action.to_direction())
+}
+
+fn tick_player(runtime: &mut Runtime) -> StepResult
+{
+	runtime.board.step(runtime.queued_dir.clone())
+}
+
+fn update_after_step(runtime: &mut Runtime, stats: &mut Stats, result: StepResult)
+{
+	match result
+	{
+		StepResult::GameOver =>
+		{
+			println!("{}[GAME OVER]{} Final length: {}", ANSI_RED, ANSI_RESET, runtime.board.snake.lenght());
+		}
+
+		StepResult::AteGreen | StepResult::AteRed =>
+		{
+			runtime.steps_since_food = 0;
+		}
+
+		StepResult::Moved => {}
+	}
+
+	if runtime.use_ai
+	{
+		runtime.steps_since_food += 1;
+		if runtime.steps_since_food >= NO_FOOD_MAX
+		{
+			runtime.board.snake.alive = false;
+		}
+	}
+
+	stats.update_best(runtime.board.snake.lenght())
+}
+
+// Functions for draw
+
