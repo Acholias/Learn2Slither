@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/20 22:02:05 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/20 22:28:41 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -45,6 +45,8 @@ const ANSI_CYAN: &str	= "\x1b[36m";
 const ANSI_YELLOW: &str	= "\x1b[33m";
 const ANSI_RED: &str	= "\x1b[31m";
 
+
+// State board/snake and player
 #[derive(Default)]
 struct Stats {
 	episode_count: u64,
@@ -87,6 +89,8 @@ struct Runtime {
 	steps_since_food: u32,
 }
 
+
+// Visual loop state
 impl Runtime {
 	fn new(mode: Mode) -> Self
 	{
@@ -131,10 +135,143 @@ impl Runtime {
 		self.speed = SPEED_AI_MIN;
 		self.speed_label = "SPEED IA MIN";
 	}
+
+	fn set_player_speed(&mut self)
+	{
+		self.speed = SPEED_PLAYER;
+		self.speed_label = "SPEED FOR PLAYER";
+	}
 }
 
+// Macroquad config create
+fn window_conf() -> Conf
+{
+	let (w, h) = window_size();
+	
+	Conf
+	{
+		window_title: "Learn2Slither".to_string(),
+		window_width: w as i32,
+		window_height: h as i32,
+		window_resizable: false,
+		..Default::default()
+	}
+}
 
+#[macroquad::main(window_conf)]
+async fn main()
+{
+	let args = Cli::parse_args();
 
+	let agent = match build_agent(&args)
+	{
+		Some(agent) => agent,
+		None		=> return,
+	};
 
+	if !args.visual { return ; }
 
-fn main() {}
+	run_visual_loop(agent, &args).await;
+}
+
+fn build_agent(args: &Cli) -> Option<Agent>
+{
+	match args.mode
+	{
+		Mode::Train			=> build_train_agent(args),
+		Mode::Predict		=> build_predict_agent(args),
+		Mode::PredictTrain	=> build_predict_train_agent(args),
+	}
+}
+
+fn build_train_agent(args: &Cli) -> Option<Agent>
+{
+	let agent = train_basic(args.sessions);
+
+	if save_if_requested(&agent, args.model.as_deref()) { return None; }
+
+	Some(agent)
+}
+
+fn build_predict_agent(args: &Cli) -> Option<Agent>
+{
+	let model_path = required_model_path(args.model.as_deref())?;
+	load_agent(model_path)
+}
+
+fn build_predict_train_agent(args: &Cli) -> Option<Agent>
+{
+	let base= load_optional_base_agent(args.model.as_deref())?;
+	let agent= train_from_agent(base, args.sessions);
+
+	if !save_if_requested(&agent, args.model.as_deref()) { return None; }
+
+	Some(agent)
+}
+
+fn required_model_path(model: Option<&str>) -> Option<&str>
+{
+	match model
+	{
+		Some(path) => Some(path),
+		None =>
+		{
+			eprintln!("{}[ERROR]{} --model is required in predict mode", ANSI_RED, ANSI_RESET);
+			None
+		}
+	}
+}
+
+fn load_optional_base_agent(model: Option<&str>) -> Option<Agent>
+{
+	let Some(path) = model else
+	{
+		return Some(Agent::new());
+	};
+
+	if !Path::new(path).exists()
+	{
+		return Some(Agent::new());
+	}
+
+	load_agent(path)
+}
+
+fn load_agent(path: &str) -> Option<Agent>
+{
+	match Agent::load_from_file(path)
+	{
+		Ok(agent) =>
+		{
+			println!("{}[LOAD]{} Model loaded from {}", ANSI_GREEN, ANSI_RESET, path);
+			Some(agent)
+		}
+		Err(error) =>
+		{
+			eprintln!("{}[ERROR]{} Load model failed: {}", ANSI_RED, ANSI_RESET, error);
+			None
+		}
+	}
+}
+
+fn save_if_requested(agent: &Agent, model: Option<&str>) -> bool
+{
+	let Some(path) = model else
+	{
+		return true;
+	};
+
+	match agent.save_to_file(path)
+	{
+		Ok(_) =>
+		{
+			println!("{}[SAVE]{} Model saved to {}", ANSI_GREEN, ANSI_RESET, path);
+			true
+		}
+		Err(error) =>
+		{
+			eprintln!("{}[ERROR]{} Save model failed: {}", ANSI_RED, ANSI_RESET, error);
+			false
+		}
+	}
+}
