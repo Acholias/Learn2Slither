@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/21 00:21:20 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/21 00:38:50 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -386,7 +386,7 @@ fn handle_ai_toggle_key(runtime: &mut Runtime)
 	runtime.use_ai = !runtime.use_ai;
 	runtime.started = true;
 
-	if runtime.use_ai { runtime.set_ai_speed_max(); } 
+	if runtime.use_ai { runtime.set_ai_speed_min(); } 
 	else { runtime.set_player_speed(); }
 
 	log(runtime, format!("{}[MODE]{} AI {}", ANSI_CYAN, ANSI_RESET, if runtime.use_ai { "ON" } else { "OFF" }));
@@ -521,8 +521,8 @@ fn draw_hud(runtime: &Runtime, stats: &Stats)
 fn draw_start_hint()
 {
 	let x = panel_left_x() + panel_padding();
-	let fs = 20.0;
-	let line = 22.0;
+	let fs = 30.0;
+	let line = 34.0;
 	let vision_lines = 5.0;
 	let vision_top_y = screen_height() - panel_padding() - (vision_lines - 1.0) * line;
 	let y = vision_top_y - 14.0;
@@ -535,10 +535,12 @@ fn draw_vision_overlay(board: &Board)
 	let v = compute_vision(board);
 
 	let x = panel_left_x() + panel_padding();
-	let fs = 20.0;
-	let line = 22.0;
+	let fs = 30.0;
+	let line = 34.0;
 	let lines = 5.0;
-	let mut y = screen_height() - panel_padding() - (lines - 30.0) * line;
+
+	let block_h = (lines - 1.0) * line;
+	let mut y = screen_height() * 0.5 - block_h * 0.5;
 
 	draw_text(&format!("Head : ({}, {})", v.head.0, v.head.1), x, y, fs, WHITE); y += line;
 	draw_text(&format!("Up   : {}", v.up), x, y, fs, WHITE); y += line;
