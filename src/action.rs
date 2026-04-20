@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/12 13:21:27 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/16 00:25:27 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/20 23:15:24 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -35,17 +35,6 @@ impl Action {
         }
     }
     
-    pub fn from_direction(dir: &Direction) -> Self
-    {
-        match dir 
-        {
-            Direction::Up       => Action::Up,
-            Direction::Right    => Action::Right,
-            Direction::Down     => Action::Down,
-            Direction::Left     => Action::Left,
-        }
-    }
-
     pub fn index(self) -> usize
     {
         match self

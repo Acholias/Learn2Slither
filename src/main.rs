@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/20 23:00:35 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/20 23:24:01 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -32,7 +32,6 @@ use crate::agent::Agent;
 use crate::state::{compute_state, print_state};
 use crate::train::{train_basic, train_from_agent};
 use cli::{Cli, Mode};
-use display::{draw_board, draw_game_over, window_size};
 
 const SPEED_PLAYER: f64	= 0.1;
 const SPEED_AI_MAX: f64	= 0.0001;
@@ -188,7 +187,7 @@ fn build_train_agent(args: &Cli) -> Option<Agent>
 {
 	let agent = train_basic(args.sessions);
 
-	if save_if_requested(&agent, args.model.as_deref()) { return None; }
+	if !save_if_requested(&agent, args.model.as_deref()) { return None; }
 
 	Some(agent)
 }
@@ -286,7 +285,7 @@ async fn run_visual_loop(mut agent: Agent, args: &Cli)
 
 	loop
 	{
-		if	is_key_pressed(KeyCode::Escape) { break ; }
+		if is_key_pressed(KeyCode::Escape) { break ; }
 	
 		handle_speed_keys(&mut runtime);
 		handle_direction_keys(&mut runtime);
@@ -399,6 +398,13 @@ fn handle_dead_state(runtime: &mut Runtime, stats: &mut Stats) -> bool
 	true
 }
 
+fn can_tick(args: &Cli, runtime: &Runtime) -> bool
+{
+	if args.step && runtime.use_ai { is_key_pressed(KeyCode::N) }
+
+	else { get_time() - runtime.last_step >= runtime.speed }
+}
+
 fn apply_tick(runtime: &mut Runtime, agent: &mut Agent, stats: &mut Stats, 
 	dontlearn_now: bool, args: &Cli, rng: &mut impl ::rand::Rng)
 {
@@ -453,4 +459,35 @@ fn update_after_step(runtime: &mut Runtime, stats: &mut Stats, result: StepResul
 }
 
 // Functions for draw
+fn draw_frame(runtime: &Runtime, stats: &Stats)
+{
+	draw_board(&runtime.board);
 
+	if runtime.use_ai || !runtime.started
+	{
+		draw_hud(runtime, stats);
+	}
+
+	if !runtime.started
+	{
+		draw_start_hint();
+	}
+}
+
+fn draw_hud(runtime: &Runtime, stats: &Stats)
+{
+	let hud = format!("Ep: {} | PR: {} | Avg: {:.2}  | Speed: {}", 
+		stats.episode_count,
+		stats.best_lenght,
+		stats.average(),
+		runtime.speed_label);
+
+	draw_text(&hud, 200.0, 30.0, 24.0, WHITE);
+}
+
+fn draw_start_hint()
+{
+	let text = "Press arrows to play, ENTER = AI, SPACE = debug";
+
+	draw_text(text, 20.0, screen_height() - 10.0, 25.0, RED);
+}
