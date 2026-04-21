@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 18:15:37 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/13 16:51:01 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/21 11:45:49 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -21,6 +21,10 @@ const PANEL_PADDING: f32 = 20.0;
 
 const COLOR_BG: Color           = Color::new(0.12, 0.12, 0.12, 1.0);
 const COLOR_GRID: Color         = Color::new(0.2,  0.2,  0.2,  1.0);
+
+const COLOR_CELL_LIGHT: Color	= Color::new(0.17, 0.5, 0.17, 1.0);
+const COLOR_CELL_DARK: Color	= Color::new(0.13, 0.38, 0.13, 1.0);
+
 const COLOR_SNAKE_HEAD: Color   = Color::new(0.2,  0.6,  1.0,  1.0);
 const COLOR_SNAKE_BODY: Color   = Color::new(0.1,  0.4,  0.8,  1.0);
 const COLOR_GREEN_APPLE: Color  = Color::new(0.2,  0.9,  0.3,  1.0);
@@ -55,6 +59,21 @@ fn  cell_to_pixel(row: usize, col: usize) -> (f32, f32)
     (x, y)
 }
 
+fn	draw_apple(x: f32, y: f32, color: Color)
+{
+	let cx = x + CELL_SIZE / 2.0;
+	let	cy = y + CELL_SIZE / 2.0 + 4.0;
+	let	r = CELL_SIZE / 2.0 - 8.0;
+
+	draw_circle(cx, cy, r, color);
+
+	draw_circle(cx - r * 0.3, cy - r * 0.33, r * 0.2, Color::new(1.0, 1.0, 1.0, 0.4));
+
+	draw_line(cx, y + 8.0, cx + 5.0, y + 3.0, 2.0, Color::new(0.4, 0.25, 0.1, 1.0));
+
+	draw_circle(cx + 6.0, y + 4.0, 4.0, Color::new(0.2, 0.7, 0.2, 1.0));
+}
+
 pub fn draw_board(board: &Board)
 {
     clear_background(COLOR_BG);
@@ -86,23 +105,36 @@ pub fn draw_board(board: &Board)
     {
         for col in 0..BOARD_SIZE
         {
-            let cell = board.get_cell(row, col);
-            let color = match cell
-            {
-                Cell::SnakeHead  => Some(COLOR_SNAKE_HEAD),
-                Cell::SnakeBody  => Some(COLOR_SNAKE_BODY),
-                Cell::GreenApple => Some(COLOR_GREEN_APPLE),
-                Cell::RedApple   => Some(COLOR_RED_APPLE),
-                Cell::Empty      => None,
-            };
+			let bg = if (row + col) % 2 == 0 { COLOR_CELL_LIGHT } else { COLOR_CELL_DARK };
+			let (x, y) = cell_to_pixel(row, col);
+			draw_rectangle(x, y, CELL_SIZE, CELL_SIZE, bg);
 
-            if let Some(c) = color
-            {
-                let (x, y) = cell_to_pixel(row, col);
+			let cell = board.get_cell(row, col);
+			let color = match cell
+			{
+				Cell::SnakeHead  => Some(COLOR_SNAKE_HEAD),
+				Cell::SnakeBody  => Some(COLOR_SNAKE_BODY),
+				Cell::GreenApple => Some(COLOR_GREEN_APPLE),
+				Cell::RedApple   => Some(COLOR_RED_APPLE),
+				Cell::Empty      => None,
+			};
 
-                draw_rectangle(x + 2.0, y + 2.0, CELL_SIZE - 4.0, CELL_SIZE - 4.0, c);
-            }
-        }
+			if let Some(c) = color
+			{
+				match cell
+				{
+					Cell::GreenApple | Cell::RedApple =>
+					{
+						draw_apple(x, y, c);
+					}
+					
+					_ =>
+					{
+						draw_rectangle(x + 2.0, y + 2.0, CELL_SIZE - 4.0, CELL_SIZE - 4.0, c);
+					}
+				}
+			}
+		}
     }
     let score_text = format!("Lenght: {}", board.snake.lenght());
     draw_text(&score_text, MARGIN, MARGIN + BOARD_SIZE as f32 * CELL_SIZE + 28.0, 24.0, WHITE);

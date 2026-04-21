@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/21 01:04:14 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/21 11:43:35 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -110,7 +110,7 @@ fn log(runtime: &Runtime, message: impl std::fmt::Display)
 	}
 }
 
-// Visual loop state
+// Visual loop state for reset board after IA or PLAYER die
 impl Runtime {
 	fn new(mode: Mode) -> Self
 	{
@@ -171,7 +171,7 @@ impl Runtime {
 	}
 }
 
-// Macroquad config create
+// Macroquad config create window with parameter setup
 fn window_conf() -> Conf
 {
 	let (w, h) = window_size();
@@ -558,16 +558,16 @@ fn draw_hud(runtime: &Runtime, stats: &Stats)
 
 fn draw_mode_status(runtime: &Runtime)
 {
-	let fs= 26.0;
-	let pad	 = panel_padding();
+	let fs = 26.0;
+	let pad = panel_padding();
 
 	let text = if runtime.use_ai { "IA: ON" } else { "IA: OFF" };
 	let dims= measure_text(text, None, fs as u16, 1.0);
 
-	let x = screen_width() - pad - dims.width;
+	let x = screen_width() - pad - dims.width - 820.0;
 	let y = screen_height() - pad;
 
-	let color = if runtime.use_ai { GREEN } else { WHITE };
+	let color = if runtime.use_ai { GREEN } else { RED };
 	draw_text(text, x, y, fs, color);
 }
 
@@ -591,7 +591,7 @@ fn draw_help_menu(runtime: &Runtime)
 	draw_text("CONTROLS (H to close)", x, ty, fs, WHITE); ty += line;
 	draw_text("TAB    : toggle AI (before start)", x, ty, fs, WHITE); ty += line;
 	draw_text("ENTER  : start / pause", x, ty, fs, WHITE); ty += line;
-	draw_text("ARROWS : start+move (Player)", x, ty, fs, WHITE); ty += line;
+	draw_text("ARROWS : start + move (Player)", x, ty, fs, WHITE); ty += line;
 	draw_text("SPACE  : vision", x, ty, fs, WHITE); ty += line;
 	draw_text("D      : logs", x, ty, fs, WHITE); ty += line;
 	draw_text("ESC    : quit", x, ty, fs, WHITE);
