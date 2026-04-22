@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 18:15:37 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 09:30:26 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 09:42:03 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,7 +15,7 @@ use crate::board::{Board, Cell};
 
 const	CELL_SIZE: f32			= 80.0;
 const	MARGIN: f32				= 50.0;
-const	MAX_BOARD_PX: f32		= 700.0;
+const	MAX_BOARD_PX: f32		= 800.0;
 
 const PANEL_WIDTH: f32			= 420.0;
 const PANEL_PADDING: f32		= 20.0;

@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 09:26:40 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 09:53:52 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -29,6 +29,7 @@ mod cli;
 use board::{Board, Direction, StepResult, DEFAULT_BOARD_SIZE};
 use display::{draw_board, draw_game_over, panel_left_x, panel_padding, window_size};
 use crate::agent::Agent;
+use crate::board::validate_board_size;
 use crate::state::{compute_state, compute_vision};
 use crate::train::{train_basic, train_from_agent};
 use cli::{Cli, Mode};
@@ -36,16 +37,16 @@ use std::sync::OnceLock;
 
 static BOARD_SIZE_GLOBAL: OnceLock<usize> = OnceLock::new();
 
+pub const ANSI_RESET: &str	= "\x1b[0m";
+pub const ANSI_GREEN: &str	= "\x1b[32m";
+pub const ANSI_CYAN: &str	= "\x1b[36m";
+pub const ANSI_YELLOW: &str	= "\x1b[33m";
+pub const ANSI_RED: &str	= "\x1b[31m";
+
 const SPEED_PLAYER: f64	= 0.1;
 const SPEED_AI_MAX: f64	= 0.0001;
 const SPEED_AI_MIN: f64	= 0.05;
 const NO_FOOD_MAX: u32	= 100;
-
-const ANSI_RESET: &str	= "\x1b[0m";
-const ANSI_GREEN: &str	= "\x1b[32m";
-const ANSI_CYAN: &str	= "\x1b[36m";
-const ANSI_YELLOW: &str	= "\x1b[33m";
-const ANSI_RED: &str	= "\x1b[31m";
 
 fn log_plain(message: impl std::fmt::Display)
 {
@@ -211,7 +212,11 @@ fn	window_conf() -> Conf
 async fn main()
 {
 	let args = Cli::parse_args();
-	let board_size = args.board_size as usize;
+	let board_size = match validate_board_size(args.board_size)
+	{
+		Some(s) => s,
+		None	=> return,
+	};
 	
 	let agent = match build_agent(&args)
 	{

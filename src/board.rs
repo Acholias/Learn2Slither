@@ -6,15 +6,19 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:43:57 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 08:56:43 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 09:51:35 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use rand::Rng;
-use crate::snake::{Snake, spawn_snake};
+use crate::{snake::{Snake, spawn_snake}};
+use crate::{ANSI_RED, ANSI_RESET};
 
 pub const   GREEN_APPLE_COUNT:  usize = 2;
 pub const	DEFAULT_BOARD_SIZE: usize = 10;
+
+const		MIN_BOARD_SIZE: usize = 4;
+const		MAX_BOARD_SIZE: usize = 10;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Direction {
@@ -139,4 +143,21 @@ impl Board {
         self.snake.advance(dir, false);
         StepResult::Moved
     }
+}
+
+pub fn validate_board_size(size: u32) -> Option<usize>
+{
+	if size < MIN_BOARD_SIZE as u32
+	{
+		eprintln!("{}[ERROR]{} --board-size {} is too small (minimum: {})", ANSI_RED, ANSI_RESET, size, MIN_BOARD_SIZE);
+		return None ;
+	}
+
+	if size > MAX_BOARD_SIZE as u32
+	{
+		eprintln!("{}[]{} --board-size {} is too large (maximum: {})", ANSI_RED, ANSI_RESET, size, MAX_BOARD_SIZE);
+		return None ;
+	}
+
+	Some(size as usize)
 }
