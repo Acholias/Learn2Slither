@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/12 13:50:36 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/15 23:53:52 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 11:30:22 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -87,7 +87,6 @@ impl Agent {
         else
         {
             let max_next= self.q_table[next_index].iter().copied().fold(f32::NEG_INFINITY, f32::max);
-
             reward + self.gamma * max_next
         };
         self.q_table[s_index][a_index] = q_sa + self.alpha * (target - q_sa);

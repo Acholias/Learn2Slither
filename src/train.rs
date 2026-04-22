@@ -6,14 +6,13 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/12 17:16:48 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/16 00:04:20 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 11:29:03 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use ::rand::thread_rng;
 use crate::agent::Agent;
 use crate::env::Env;
-
 
 pub fn train_basic(sessions: u32) -> Agent
 {
