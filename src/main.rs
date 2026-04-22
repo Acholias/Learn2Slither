@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 11:28:49 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 14:03:47 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -23,7 +23,6 @@ mod rewards;
 mod env;
 mod agent;
 mod train;
-mod key_manager;
 mod cli;
 
 use board::{Board, Direction, StepResult, DEFAULT_BOARD_SIZE};
@@ -57,7 +56,6 @@ fn log_err_plain(message: impl std::fmt::Display)
 {
 	eprintln!("{}", message);
 }
-
 
 // State board/snake and player
 #[derive(Default)]
@@ -352,7 +350,7 @@ async fn run_visual_loop(mut agent: Agent, args: &Cli, board_size: usize)
 			continue ;
 		}
 
-		if is_key_pressed(KeyCode::Escape) { break ; }
+		if is_key_pressed(KeyCode::Escape) { runtime.should_quit = true; }
 	
 		handle_speed_keys(&mut runtime);
 		handle_mode_toggle_key(&mut runtime);
@@ -600,10 +598,10 @@ fn draw_hud(runtime: &Runtime, stats: &Stats)
 	let fs = 24.0;
 	let line = 28.0;
 
-	draw_text(&format!("Ep   : {}", stats.episode_count), x, y, fs, WHITE); y += line;
-	draw_text(&format!("PR   : {}", stats.best_lenght), x, y, fs, WHITE); y += line;
-	draw_text(&format!("Avg  : {:.2}", stats.average()), x, y, fs, WHITE); y += line;
-	draw_text(&format!("Speed: {}", runtime.speed_label), x, y, fs, WHITE);
+	draw_text(&format!("Ep   : {}", stats.episode_count), x, y, fs, YELLOW); y += line;
+	draw_text(&format!("PR   : {}", stats.best_lenght), x, y, fs, YELLOW); y += line;
+	draw_text(&format!("Avg  : {:.2}", stats.average()), x, y, fs, YELLOW); y += line;
+	draw_text(&format!("Speed: {}", runtime.speed_label), x, y, fs, YELLOW);
 }
 
 fn draw_mode_status(runtime: &Runtime)

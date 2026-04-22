@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:43:57 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 09:51:35 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 12:50:34 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -155,9 +155,8 @@ pub fn validate_board_size(size: u32) -> Option<usize>
 
 	if size > MAX_BOARD_SIZE as u32
 	{
-		eprintln!("{}[]{} --board-size {} is too large (maximum: {})", ANSI_RED, ANSI_RESET, size, MAX_BOARD_SIZE);
+		eprintln!("{}[ERROR]{} --board-size {} is too large (maximum: {})", ANSI_RED, ANSI_RESET, size, MAX_BOARD_SIZE);
 		return None ;
 	}
-
 	Some(size as usize)
 }
