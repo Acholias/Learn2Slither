@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 10:15:12 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 11:27:06 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -685,8 +685,8 @@ fn	draw_final_stats(stats: &Stats, sessions: u32)
     let lines = [
 		format!("Sessions  : {}", sessions),
 		format!("Best length: {}", stats.best_lenght),
-		format!("Average   : {:.2}", stats.average()),
-		format!("Total ep  : {}", stats.episode_count),
+		format!("Average lenghth  : {:.2}", stats.average()),
+		format!("Total episodes  : {}", stats.episode_count),
 	];
 
 	for text in &lines
