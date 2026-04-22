@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 09:53:52 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 10:15:12 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -105,6 +105,7 @@ struct Runtime {
 	show_vision: bool,
 	show_logs: bool,
 	show_help: bool,
+	should_quit: bool,
 }
 
 fn log(runtime: &Runtime, message: impl std::fmt::Display)
@@ -138,6 +139,7 @@ impl Runtime {
 			show_vision: false,
 			show_logs: false,
 			show_help: true,
+			should_quit: false,
 		};
 
 		if use_ai { rt.set_ai_speed_min(); }
@@ -341,6 +343,15 @@ async fn run_visual_loop(mut agent: Agent, args: &Cli, board_size: usize)
 
 	loop
 	{
+		if runtime.should_quit == true
+		{
+			draw_final_stats(&stats, args.sessions);
+			next_frame().await;
+			if is_key_pressed(KeyCode::Escape) { break ; }
+
+			continue ;
+		}
+
 		if is_key_pressed(KeyCode::Escape) { break ; }
 	
 		handle_speed_keys(&mut runtime);
@@ -349,7 +360,7 @@ async fn run_visual_loop(mut agent: Agent, args: &Cli, board_size: usize)
 		handle_enter_key(&mut runtime);
 		handle_debug_key(&mut runtime);
 
-		if handle_dead_state(&mut runtime, &mut stats)
+		if handle_dead_state(&mut runtime, &mut stats, args.sessions as u64)
 		{
 			next_frame().await;
 			continue ;
@@ -477,7 +488,7 @@ fn handle_debug_key(runtime: &mut Runtime)
 }
 
 // Game state transitions
-fn handle_dead_state(runtime: &mut Runtime, stats: &mut Stats) -> bool
+fn handle_dead_state(runtime: &mut Runtime, stats: &mut Stats, max_sessions: u64) -> bool
 {
 	if runtime.board.snake.alive { return false; }
 
@@ -485,6 +496,18 @@ fn handle_dead_state(runtime: &mut Runtime, stats: &mut Stats) -> bool
 	{
 		let final_length = runtime.board.snake.lenght();
 		stats.close_ai_episode(final_length);
+		
+		if stats.episode_count >= max_sessions as u64
+		{
+			log_plain(format!("{}[DONE]{} {} sessions completed. Best: {} Avg: {:.2}",
+                ANSI_GREEN, ANSI_RESET,
+                max_sessions,
+                stats.best_lenght,
+                stats.average()));
+			
+			runtime.should_quit = true;
+			return true;
+		}
 		runtime.reset_board(true);
 		return true;
 	}
@@ -641,4 +664,39 @@ fn draw_vision_overlay(board: &Board, runtime: &Runtime)
 	draw_text(&format!("Down : {}", v.down), x, y, fs, WHITE); y += line;
 	draw_text(&format!("Left : {}", v.left), x, y, fs, WHITE); y += line;
 	draw_text(&format!("Right: {}", v.right), x, y, fs, WHITE);
+}
+
+fn	draw_final_stats(stats: &Stats, sessions: u32)
+{
+	clear_background(BLACK);
+
+	let fs_title = 48.0;
+	let fs_text  = 28.0;
+	let line     = 38.0;
+	let cx       = screen_width() / 2.0;
+	let mut y    = screen_height() / 2.0 - line * 3.0;
+
+	let tittle = "SESSION COMPLETE";
+	let dim = measure_text(tittle, None, fs_title as u16, 1.0);
+	draw_text(tittle, cx - dim.width / 2.0, y, fs_title, GREEN);
+
+	y += line * 2.0;
+
+    let lines = [
+		format!("Sessions  : {}", sessions),
+		format!("Best length: {}", stats.best_lenght),
+		format!("Average   : {:.2}", stats.average()),
+		format!("Total ep  : {}", stats.episode_count),
+	];
+
+	for text in &lines
+	{
+		let dim = measure_text(text, None, fs_text as u16, 1.0);
+		draw_text(text, cx - dim.width / 2.0, y, fs_text, WHITE);
+		y += line;
+	}
+
+	let quit = "Press ESC to quit";
+	let dim = measure_text(quit, None, fs_text as u16, 1.0);
+	draw_text(quit, cx - dim.width / 2.0, y + line, fs_text, GRAY);
 }
