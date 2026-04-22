@@ -6,18 +6,19 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 18:15:37 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/21 11:45:49 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 09:30:26 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use macroquad::prelude::*;
-use crate::board::{Board, Cell, BOARD_SIZE};
+use crate::board::{Board, Cell};
 
-const   CELL_SIZE: f32  = 80.0;
-const   MARGIN: f32     = 50.0;
+const	CELL_SIZE: f32			= 80.0;
+const	MARGIN: f32				= 50.0;
+const	MAX_BOARD_PX: f32		= 700.0;
 
-const PANEL_WIDTH: f32 = 420.0;
-const PANEL_PADDING: f32 = 20.0;
+const PANEL_WIDTH: f32			= 420.0;
+const PANEL_PADDING: f32		= 20.0;
 
 const COLOR_BG: Color           = Color::new(0.12, 0.12, 0.12, 1.0);
 const COLOR_GRID: Color         = Color::new(0.2,  0.2,  0.2,  1.0);
@@ -30,20 +31,24 @@ const COLOR_SNAKE_BODY: Color   = Color::new(0.1,  0.4,  0.8,  1.0);
 const COLOR_GREEN_APPLE: Color  = Color::new(0.2,  0.9,  0.3,  1.0);
 const COLOR_RED_APPLE: Color    = Color::new(0.9,  0.2,  0.2,  1.0);
 
-pub fn window_size() -> (f32, f32)
+pub fn cell_size(board_size: usize) -> f32
 {
-    let board_px = BOARD_SIZE as f32 * CELL_SIZE;
-    let board_area = board_px + MARGIN * 2.0;
-
-    let w = board_area + PANEL_WIDTH;
-    let h = board_area + 40.0;
-
-    (w, h)
+	MAX_BOARD_PX / board_size as f32
 }
 
-pub fn panel_left_x() -> f32
+pub fn window_size(board_size: usize) -> (f32, f32)
 {
-    let board_px = BOARD_SIZE as f32 * CELL_SIZE;
+	let cs = cell_size(board_size);
+	let board_px = board_size as f32 * cs;
+	let board_area = board_px + MARGIN * 2.0;
+	let w = board_area + PANEL_WIDTH;
+	let h = board_area + 40.0;
+	(w, h)
+}
+
+pub fn panel_left_x(board_size: usize) -> f32
+{
+    let board_px = board_size as f32 * CELL_SIZE;
     MARGIN + board_px + MARGIN
 }
 
@@ -78,14 +83,14 @@ pub fn draw_board(board: &Board)
 {
     clear_background(COLOR_BG);
     
-    for i in 0..=BOARD_SIZE
+    for i in 0..=board.size
     {
         let i_f = i as f32;
 
         draw_line(
             MARGIN, 
             MARGIN + i_f * CELL_SIZE,
-            MARGIN+ BOARD_SIZE as f32 * CELL_SIZE,
+            MARGIN+ board.size as f32 * CELL_SIZE,
             MARGIN + i_f * CELL_SIZE,
             1.0,
             COLOR_GRID,
@@ -95,15 +100,15 @@ pub fn draw_board(board: &Board)
             MARGIN + i_f * CELL_SIZE,
             MARGIN,
             MARGIN + i_f * CELL_SIZE,
-            MARGIN + BOARD_SIZE as f32 * CELL_SIZE,
+            MARGIN + board.size as f32 * CELL_SIZE,
             1.0,
             COLOR_GRID,
         );
     }
 
-    for row in 0..BOARD_SIZE
+    for row in 0..board.size
     {
-        for col in 0..BOARD_SIZE
+        for col in 0..board.size
         {
 			let bg = if (row + col) % 2 == 0 { COLOR_CELL_LIGHT } else { COLOR_CELL_DARK };
 			let (x, y) = cell_to_pixel(row, col);
@@ -123,10 +128,7 @@ pub fn draw_board(board: &Board)
 			{
 				match cell
 				{
-					Cell::GreenApple | Cell::RedApple =>
-					{
-						draw_apple(x, y, c);
-					}
+					Cell::GreenApple | Cell::RedApple => { draw_apple(x, y, c); }
 					
 					_ =>
 					{
@@ -137,7 +139,7 @@ pub fn draw_board(board: &Board)
 		}
     }
     let score_text = format!("Lenght: {}", board.snake.lenght());
-    draw_text(&score_text, MARGIN, MARGIN + BOARD_SIZE as f32 * CELL_SIZE + 28.0, 24.0, WHITE);
+    draw_text(&score_text, MARGIN, MARGIN + board.size as f32 * CELL_SIZE + 28.0, 24.0, WHITE);
 }
 
 pub fn draw_game_over(board: &Board)

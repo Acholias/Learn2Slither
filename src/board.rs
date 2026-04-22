@@ -6,15 +6,15 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:43:57 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/15 11:04:19 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 08:56:43 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use rand::Rng;
 use crate::snake::{Snake, spawn_snake};
 
-pub const   BOARD_SIZE: usize = 10;
 pub const   GREEN_APPLE_COUNT:  usize = 2;
+pub const	DEFAULT_BOARD_SIZE: usize = 10;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Direction {
@@ -49,12 +49,12 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn new() -> Self
+    pub fn new(size: usize) -> Self
     {
-        let snake = spawn_snake();
+        let snake = spawn_snake(size);
 
         let mut board = Board {
-            size: BOARD_SIZE,
+            size,
             snake,
             green_apples: Vec::new(),
             red_apples: (0, 0),

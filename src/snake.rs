@@ -6,11 +6,11 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:50:10 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/15 11:03:59 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 08:49:14 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
-use crate::board::{Direction, BOARD_SIZE};
+use crate::board::Direction;
 
 #[derive(Clone, Debug)]
 pub struct Snake {
@@ -76,13 +76,13 @@ impl Snake {
     }
 }
 
-pub fn spawn_snake() -> Snake
+pub fn spawn_snake(size: usize) -> Snake
 {
     use rand::Rng;
     let mut rng = rand::thread_rng();
 
-    let row = rng.gen_range(1..BOARD_SIZE - 1);
-    let col = rng.gen_range(2..BOARD_SIZE - 1);
+    let row = rng.gen_range(1..size - 1);
+    let col = rng.gen_range(2..size - 1);
 
     let body = vec! [(row, col), (row, col - 1), (row, col - 2)];
     

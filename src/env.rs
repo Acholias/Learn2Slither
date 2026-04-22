@@ -6,12 +6,12 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/12 13:38:42 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/12 13:49:49 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 09:13:34 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use crate::action::Action;
-use crate::board::{Board, StepResult};
+use crate::board::{Board, StepResult, DEFAULT_BOARD_SIZE};
 use crate::rewards::compute_reward;
 use crate::state::{compute_state, State};
 
@@ -22,12 +22,12 @@ pub struct Env {
 impl Env {
     pub fn new() -> Self
     {
-        Env {board: Board::new(), }
+        Env {board: Board::new(DEFAULT_BOARD_SIZE), }
     }
 
     pub fn reset(&mut self) -> State
     {
-        self.board = Board::new();
+        self.board = Board::new(DEFAULT_BOARD_SIZE);
         compute_state(&self.board)
     }
 

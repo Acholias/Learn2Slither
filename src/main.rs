@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/21 11:43:35 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/22 09:26:40 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -26,12 +26,15 @@ mod train;
 mod key_manager;
 mod cli;
 
-use board::{Board, Direction, StepResult};
+use board::{Board, Direction, StepResult, DEFAULT_BOARD_SIZE};
 use display::{draw_board, draw_game_over, panel_left_x, panel_padding, window_size};
 use crate::agent::Agent;
 use crate::state::{compute_state, compute_vision};
 use crate::train::{train_basic, train_from_agent};
 use cli::{Cli, Mode};
+use std::sync::OnceLock;
+
+static BOARD_SIZE_GLOBAL: OnceLock<usize> = OnceLock::new();
 
 const SPEED_PLAYER: f64	= 0.1;
 const SPEED_AI_MAX: f64	= 0.0001;
@@ -89,6 +92,7 @@ impl Stats {
 
 struct Runtime {
 	board:	Board,
+	board_size: usize,
 	queued_dir:	Direction,
 	started: bool,
 	paused: bool,
@@ -112,15 +116,16 @@ fn log(runtime: &Runtime, message: impl std::fmt::Display)
 
 // Visual loop state for reset board after IA or PLAYER die
 impl Runtime {
-	fn new(mode: Mode) -> Self
+	fn new(mode: Mode, board_size: usize) -> Self
 	{
-		let board = Board::new();
+		let board = Board::new(board_size);
 		let queued_dir = board.snake.direction.clone();
 		let use_ai = matches!(mode, Mode::Predict | Mode::PredictTrain);
 
 		let mut rt = Self
 		{
 			board,
+			board_size,
 			queued_dir,
 			started: false,
 			paused: false,
@@ -143,7 +148,7 @@ impl Runtime {
 
 	fn reset_board(&mut self, started: bool)
 	{
-		self.board= Board::new();
+		self.board= Board::new(self.board_size);
 		self.queued_dir = self.board.snake.direction.clone();
 		self.last_step= get_time();
 		self.steps_since_food = 0;
@@ -171,10 +176,26 @@ impl Runtime {
 	}
 }
 
-// Macroquad config create window with parameter setup
-fn window_conf() -> Conf
+fn	parse_board_size() -> usize
 {
-	let (w, h) = window_size();
+	let args: Vec<String> = std::env::args().collect();
+
+	for i in 0..args.len()
+	{
+		if let Some(val) = args.get(i + 1)
+		{
+			if let Ok(n) = val.parse::<usize>() { return n; }
+		}
+	}
+	DEFAULT_BOARD_SIZE
+}
+
+// Macroquad config create window with parameter setup
+fn	window_conf() -> Conf
+{
+	let size = *BOARD_SIZE_GLOBAL.get_or_init(parse_board_size);
+
+	let (w, h) = window_size(size);
 	
 	Conf
 	{
@@ -190,7 +211,8 @@ fn window_conf() -> Conf
 async fn main()
 {
 	let args = Cli::parse_args();
-
+	let board_size = args.board_size as usize;
+	
 	let agent = match build_agent(&args)
 	{
 		Some(agent) => agent,
@@ -199,7 +221,7 @@ async fn main()
 
 	if !args.visual { return ; }
 
-	run_visual_loop(agent, &args).await;
+	run_visual_loop(agent, &args, board_size).await;
 }
 
 fn build_agent(args: &Cli) -> Option<Agent>
@@ -305,9 +327,9 @@ fn save_if_requested(agent: &Agent, model: Option<&str>) -> bool
 }
 
 // Visual loop
-async fn run_visual_loop(mut agent: Agent, args: &Cli)
+async fn run_visual_loop(mut agent: Agent, args: &Cli, board_size: usize)
 {
-	let mut runtime = Runtime::new(args.mode);
+	let mut runtime = Runtime::new(args.mode, board_size);
 	let mut stats = Stats::default();
 	let dontmlearn_now = matches!(args.mode, Mode::Predict) || args.dontlearn;
 	let mut rng = thread_rng();
@@ -535,7 +557,7 @@ fn draw_frame(runtime: &Runtime, stats: &Stats)
 
 	if runtime.show_vision
 	{
-		draw_vision_overlay(&runtime.board);
+		draw_vision_overlay(&runtime.board, runtime);
 	}
 
 	draw_hud(runtime, stats);
@@ -545,7 +567,7 @@ fn draw_frame(runtime: &Runtime, stats: &Stats)
 
 fn draw_hud(runtime: &Runtime, stats: &Stats)
 {
-	let x = panel_left_x() + panel_padding();
+	let x = panel_left_x(runtime.board_size) + panel_padding();
 	let mut y = 30.0;
 	let fs = 24.0;
 	let line = 28.0;
@@ -579,7 +601,7 @@ fn draw_help_menu(runtime: &Runtime)
 	let line = 26.0;
 	let pad = panel_padding();
 
-	let x = panel_left_x() + pad;
+	let x = panel_left_x(runtime.board_size) + pad;
 	let w = screen_width() - x - pad;
 
 	let h = 7.0 * line + 8.0;
@@ -597,11 +619,11 @@ fn draw_help_menu(runtime: &Runtime)
 	draw_text("ESC    : quit", x, ty, fs, WHITE);
 }
 
-fn draw_vision_overlay(board: &Board)
+fn draw_vision_overlay(board: &Board, runtime: &Runtime)
 {
 	let v = compute_vision(board);
 
-	let x = panel_left_x() + panel_padding();
+	let x = panel_left_x(runtime.board_size) + panel_padding();
 	let fs = 30.0;
 	let line = 34.0;
 	let lines = 5.0;
