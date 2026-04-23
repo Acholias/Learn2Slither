@@ -68,33 +68,26 @@ Le Makefile fournit les commandes usuelles. Le binaire s’appelle `snake` (voir
 - Build release + copie du binaire en `./snake` :
 
 ```bash
-make build
+make
 ```
 
 - Entraîner et sauvegarder un modèle (sans GUI) :
 
 ```bash
-make run ARGS="--mode train -n 50000 --model models/agent.json"
+./snake --mode train -sessions 50000 --model models/agent.json"
 ```
 
 - Charger un modèle et afficher la GUI en mode IA :
 
 ```bash
-make run ARGS="--mode predict --model models/agent.json --visual"
+./snake --mode predict --model models/agent.json --visual
 ```
 
 - Continuer l’entraînement à partir d’un modèle existant, puis afficher :
 
 ```bash
-make run ARGS="--mode predict-train -n 20000 --model models/agent.json --visual"
+./snake --mode predict-train -sessions 20000 --model models/agent.json --visual
 ```
-
-### Alternative (sans `make`)
-
-```bash
-cargo run --release -- --mode predict --model models/agent.json --visual
-```
-
 ### Options CLI (résumé)
 
 - `--mode <train|predict|predict-train>`

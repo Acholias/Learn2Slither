@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/22 14:46:43 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 15:26:44 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/23 13:01:29 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -38,9 +38,9 @@ pub fn draw_hud(runtime: &Runtime, stats: &Stats)
 	let fs = 24.0;
 	let line = 28.0;
 
-	draw_text(&format!("Ep   : {}", stats.episode_count), x, y, fs, YELLOW); y += line;
-	draw_text(&format!("PR   : {}", stats.best_lenght), x, y, fs, YELLOW); y += line;
-	draw_text(&format!("Avg  : {:.2}", stats.average()), x, y, fs, YELLOW); y += line;
+	draw_text(&format!("Episode          : {}", stats.episode_count), x, y, fs, YELLOW); y += line;
+	draw_text(&format!("Personnal record : {}", stats.best_lenght), x, y, fs, YELLOW); y += line;
+	draw_text(&format!("Average length   : {:.2}", stats.average()), x, y, fs, YELLOW); y += line;
 	draw_text(&format!("Speed: {}", runtime.speed_label), x, y, fs, YELLOW);
 }
 
@@ -80,7 +80,7 @@ pub fn draw_help_menu(runtime: &Runtime)
 	draw_text("TAB    : toggle AI (before start)", x, ty, fs, WHITE); ty += line;
 	draw_text("ENTER  : start / pause", x, ty, fs, WHITE); ty += line;
 	draw_text("ARROWS : start + move (Player)", x, ty, fs, WHITE); ty += line;
-	draw_text("SPACE  : vision", x, ty, fs, WHITE); ty += line;
+	draw_text("SPACE  : print vision", x, ty, fs, WHITE); ty += line;
 	draw_text("D      : logs", x, ty, fs, WHITE); ty += line;
 	draw_text("ESC    : quit", x, ty, fs, WHITE);
 }

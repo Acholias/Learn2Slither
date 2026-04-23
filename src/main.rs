@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 15:38:22 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/23 12:59:07 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -89,3 +89,6 @@ async fn main()
 
 	run_visual_loop(agent, &args, board_size).await;
 }
+
+// TODO: Faire en sorte que le snake puisse gagner et ajouter le nombre de victoire sur le hud de
+// fin ainsi que sur la data print sur la window !

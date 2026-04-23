@@ -68,31 +68,25 @@ The Makefile provides the usual commands. The binary is called `snake` (see [Car
 - Release build + copy the binary to `./snake`:
 
 ```bash
-make build
+make
 ```
 
 - Train and save a model (no GUI):
 
 ```bash
-make run ARGS="--mode train -n 50000 --model models/agent.json"
+./snake --mode train -sessions 50000 --model models/agent.json"
 ```
 
 - Load a model and open the GUI in AI mode:
 
 ```bash
-make run ARGS="--mode predict --model models/agent.json --visual"
+./snake --mode predict --model models/agent.json --visual
 ```
 
 - Continue training from an existing model, then display:
 
 ```bash
-make run ARGS="--mode predict-train -n 20000 --model models/agent.json --visual"
-```
-
-### Alternative (without `make`)
-
-```bash
-cargo run --release -- --mode predict --model models/agent.json --visual
+./snake --mode predict-train -n 20000 --model models/agent.json --visual
 ```
 
 ### CLI options (quick)
