@@ -89,6 +89,3 @@ async fn main()
 
 	run_visual_loop(agent, &args, board_size).await;
 }
-
-// TODO: Faire en sorte que le snake puisse gagner et ajouter le nombre de victoire sur le hud de
-// fin ainsi que sur la data print sur la window !
