@@ -6,18 +6,18 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 18:15:37 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/23 12:44:11 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/26 10:27:31 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use macroquad::prelude::*;
 use crate::board::{Board, Cell};
 
-const	CELL_SIZE: f32			= 80.0;
+const	CELL_SIZE: f32			= 50.0;
 const	MARGIN: f32				= 50.0;
 const	MAX_BOARD_PX: f32		= 800.0;
 
-const PANEL_WIDTH: f32			= 420.0;
+const PANEL_WIDTH: f32			= 820.0;
 const PANEL_PADDING: f32		= 20.0;
 
 const COLOR_BG: Color           = Color::new(0.12, 0.12, 0.12, 1.0);

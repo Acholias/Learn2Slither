@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/22 14:46:43 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/23 13:01:29 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/26 10:25:16 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -52,7 +52,7 @@ pub fn draw_mode_status(runtime: &Runtime)
 	let text = if runtime.use_ai { "IA: ON" } else { "IA: OFF" };
 	let dims= measure_text(text, None, fs as u16, 1.0);
 
-	let x = screen_width() - pad - dims.width - 820.0;
+	let x = screen_width() - pad - dims.width - 1600.0;
 	let y = screen_height() - pad;
 
 	let color = if runtime.use_ai { GREEN } else { RED };

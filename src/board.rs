@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 16:43:57 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/24 19:14:28 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/26 10:15:40 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,7 +18,7 @@ pub const	GREEN_APPLE_COUNT: usize = 2;
 pub const	DEFAULT_BOARD_SIZE: usize = 10;
 
 const		MIN_BOARD_SIZE: usize = 4;
-const		MAX_BOARD_SIZE: usize = 10;
+const		MAX_BOARD_SIZE: usize = 15;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Direction
