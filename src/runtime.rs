@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/22 14:39:05 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 15:12:20 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/29 20:52:53 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -94,5 +94,10 @@ impl Runtime {
 	{
 		self.speed = SPEED_PLAYER;
 		self.speed_label = "SPEED FOR PLAYER";
+	}
+
+	pub fn print_log(&self, message: impl std::fmt::Display)
+	{
+		if self.show_logs { println!("{}", message); }
 	}
 }

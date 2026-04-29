@@ -6,12 +6,9 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/22 14:36:46 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 15:25:25 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/29 20:48:11 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
-
-
-use crate::logger::{ANSI_CYAN, ANSI_GREEN, ANSI_RESET, log_plain};
 
 #[derive(Default)]
 pub struct Stats {
@@ -32,7 +29,6 @@ impl Stats {
 		if current_length > self.best_lenght
 		{
 			self.best_lenght= current_length;
-			log_plain(format!("{}[RECORD]{} New length record: {}", ANSI_GREEN, ANSI_RESET, self.best_lenght));
 		}
 	}
 
@@ -40,6 +36,5 @@ impl Stats {
 	{
 		self.episode_count += 1;
 		self.total_length += final_length as u64;
-		log_plain(format!("{}[EPISODE]{} #{} finished. Final lenght = {}", ANSI_CYAN, ANSI_RESET, self.episode_count, final_length));
 	}
 }

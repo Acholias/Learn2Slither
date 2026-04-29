@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/22 14:50:38 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 15:29:30 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/29 21:01:48 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -20,9 +20,9 @@ use crate::stats::Stats;
 use crate::input::*;
 use crate::cli::Mode;
 use crate::state::compute_state;
-use crate::hud::{draw_frame, draw_final_stats};
+use crate::hud::{draw_final_stats, draw_frame, init_terminal_hud, print_terminal_hud};
 use crate::display::draw_game_over;
-use crate::logger::{ANSI_GREEN, ANSI_RED, ANSI_RESET, log_plain, log};
+use crate::logger::{ANSI_GREEN, ANSI_RED, ANSI_RESET, ANSI_CYAN, log};
 
 const NO_FOOD_MAX: u32	= 100;
 
@@ -32,6 +32,8 @@ pub async fn run_visual_loop(mut agent: Agent, args: &Cli, board_size: usize)
 	let mut stats = Stats::default();
 	let dontmlearn_now = matches!(args.mode, Mode::Predict) || args.dontlearn;
 	let mut rng = thread_rng();
+
+	if args.hud { init_terminal_hud(); }
 
 	loop
 	{
@@ -76,12 +78,15 @@ pub fn handle_dead_state(runtime: &mut Runtime, stats: &mut Stats, max_sessions:
 	{
 		let final_length = runtime.board.snake.lenght();
 		stats.close_ai_episode(final_length);
-		
+	
+		runtime.print_log(format!("{}[EPISODE]{} #{} finished. Final lenght = {}",
+            ANSI_CYAN, ANSI_RESET, stats.episode_count, final_length));
+
 		if stats.episode_count >= max_sessions as u64
 		{	
 			runtime.should_quit = true;
 
-			log_plain(format!("{}[DONE]{} {} sessions completed. Best: {} Avg: {:.2}",
+			runtime.print_log(format!("{}[DONE]{} {} sessions completed. Best: {} Avg: {:.2}",
                 ANSI_GREEN, ANSI_RESET,
                 max_sessions,
                 stats.best_lenght,
@@ -115,6 +120,11 @@ pub fn apply_tick(runtime: &mut Runtime, agent: &mut Agent, stats: &mut Stats,
 	else { tick_player(runtime) };
 
 	update_after_step(runtime, stats, result);	
+
+	if args.hud
+	{
+		print_terminal_hud(&runtime.board);
+	}
 }
 
 pub fn tick_ai(runtime: &mut Runtime, agent: &mut Agent, dontlearn_now: bool, rng: &mut impl ::rand::Rng) -> StepResult
@@ -155,5 +165,12 @@ pub fn update_after_step(runtime: &mut Runtime, stats: &mut Stats, result: StepR
 			runtime.board.snake.alive = false;
 		}
 	}
-	stats.update_best(runtime.board.snake.lenght())
+	let prev_best_length = stats.best_lenght;
+	stats.update_best(runtime.board.snake.lenght());
+
+	if stats.best_lenght > prev_best_length
+	{
+        runtime.print_log(format!("{}[RECORD]{} New length record: {}",
+			ANSI_GREEN, ANSI_RESET, stats.best_lenght));
+	}
 }

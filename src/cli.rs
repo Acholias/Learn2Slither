@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/15 11:08:00 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 10:00:18 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/29 20:22:03 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -35,6 +35,9 @@ pub struct Cli {
 
 	#[arg(long, default_value_t = 10)]
 	pub board_size: u32,
+
+	#[arg(long)]
+	pub hud: bool,
 }
 
 #[derive(Copy, Clone, Debug, ValueEnum)]

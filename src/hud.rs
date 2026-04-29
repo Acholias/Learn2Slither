@@ -6,14 +6,15 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/22 14:46:43 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/26 10:25:16 by lumugot          ###   ########.fr       //
+//   Updated: 2026/04/29 20:38:50 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use macroquad::prelude::*;
-use crate::board::Board;
+use crate::board::{Board, Direction};
 use crate::runtime::Runtime;
 use crate::stats::Stats;
+use crate::logger::{ANSI_CYAN, ANSI_RESET};
 use crate::state::compute_vision;
 use crate::display::{draw_board, panel_left_x, panel_padding};
 
@@ -42,6 +43,32 @@ pub fn draw_hud(runtime: &Runtime, stats: &Stats)
 	draw_text(&format!("Personnal record : {}", stats.best_lenght), x, y, fs, YELLOW); y += line;
 	draw_text(&format!("Average length   : {:.2}", stats.average()), x, y, fs, YELLOW); y += line;
 	draw_text(&format!("Speed: {}", runtime.speed_label), x, y, fs, YELLOW);
+}
+
+pub fn print_terminal_hud(board: &Board)
+{
+	let vision = compute_vision(board);
+
+	let dir_str = match board.snake.direction
+	{
+		Direction::Up    => "Up",
+		Direction::Down  => "Down",
+		Direction::Left  => "Left",
+		Direction::Right => "Right",
+	};
+
+	print!("\x1b[6A");
+	println!("{}[HUD]{} Head : ({}, {})", ANSI_CYAN, ANSI_RESET, vision.head.0, vision.head.1);
+	println!("{}[HUD]{} Up   : {}",       ANSI_CYAN, ANSI_RESET, vision.up);
+	println!("{}[HUD]{} Down : {}",       ANSI_CYAN, ANSI_RESET, vision.down);
+	println!("{}[HUD]{} Left : {}",       ANSI_CYAN, ANSI_RESET, vision.left);
+	println!("{}[HUD]{} Right: {}",       ANSI_CYAN, ANSI_RESET, vision.right);
+	println!("{}[HUD]{} Dir  : {}",       ANSI_CYAN, ANSI_RESET, dir_str);
+}
+
+pub fn	init_terminal_hud()
+{
+	for _ in 0..6 { println!(); }
 }
 
 pub fn draw_mode_status(runtime: &Runtime)
@@ -76,12 +103,12 @@ pub fn draw_help_menu(runtime: &Runtime)
 	draw_rectangle(x - 10.0, y - 22.0, w + 20.0, h + 70.0, Color::new(0.0, 0.0, 0.0, 0.75));
 
 	let mut ty = y;
-	draw_text("CONTROLS (H to close)", x, ty, fs, WHITE); ty += line;
-	draw_text("TAB    : toggle AI (before start)", x, ty, fs, WHITE); ty += line;
-	draw_text("ENTER  : start / pause", x, ty, fs, WHITE); ty += line;
-	draw_text("ARROWS : start + move (Player)", x, ty, fs, WHITE); ty += line;
-	draw_text("SPACE  : print vision", x, ty, fs, WHITE); ty += line;
-	draw_text("D      : logs", x, ty, fs, WHITE); ty += line;
+	draw_text("CONTROLS (H to close)", x, ty, fs, WHITE);				ty += line;
+	draw_text("TAB    : toggle AI (before start)", x, ty, fs, WHITE);	ty += line;
+	draw_text("ENTER  : start / pause", x, ty, fs, WHITE);				ty += line;
+	draw_text("ARROWS : start + move (Player)", x, ty, fs, WHITE);		ty += line;
+	draw_text("SPACE  : print vision", x, ty, fs, WHITE);				ty += line;
+	draw_text("D      : logs", x, ty, fs, WHITE);						ty += line;
 	draw_text("ESC    : quit", x, ty, fs, WHITE);
 }
 
@@ -97,11 +124,21 @@ pub fn	draw_vision_overlay(board: &Board, runtime: &Runtime)
 	let block_h = (lines - 1.0) * line;
 	let mut y = screen_height() * 0.5 - block_h * 0.5;
 
-	draw_text(&format!("Head : ({}, {})", v.head.0, v.head.1), x, y, fs, WHITE); y += line;
-	draw_text(&format!("Up   : {}", v.up), x, y, fs, WHITE); y += line;
-	draw_text(&format!("Down : {}", v.down), x, y, fs, WHITE); y += line;
-	draw_text(&format!("Left : {}", v.left), x, y, fs, WHITE); y += line;
-	draw_text(&format!("Right: {}", v.right), x, y, fs, WHITE);
+	draw_text(&format!("Head : ({}, {})", v.head.0, v.head.1), x, y, fs, WHITE);	y += line;
+	draw_text(&format!("Up   : {}", v.up), x, y, fs, WHITE);						y += line;
+	draw_text(&format!("Down : {}", v.down), x, y, fs, WHITE);						y += line;
+	draw_text(&format!("Left : {}", v.left), x, y, fs, WHITE);						y += line;
+	draw_text(&format!("Right: {}", v.right), x, y, fs, WHITE);						y += line;
+
+	let snake_dir = match runtime.board.snake.direction
+	{
+		Direction::Up		=> "Up",
+		Direction::Down		=> "Down",
+		Direction::Left		=> "Left",
+		Direction::Right	=> "Right",
+	};
+
+	draw_text(&format!("Direction: {}", snake_dir), x, y, fs, WHITE);
 }
 
 pub fn	draw_final_stats(stats: &Stats, sessions: u32)
