@@ -147,7 +147,6 @@ learn2slither/
 
 ```bash
 make build      # Release build and copy binary to ./snake
-make run        # Runs with cargo (optional args: make run ARGS="...")
 make clean      # Removes Cargo artifacts
 make fclean     # clean + removes local ./snake binary
 make purge      # fclean + removes ./models

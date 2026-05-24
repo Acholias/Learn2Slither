@@ -146,7 +146,6 @@ learn2slither/
 
 ```bash
 make build      # Build en release et copie du binaire en ./snake
-make run        # Lance avec cargo (args possibles: make run ARGS="...")
 make clean      # Supprime les artefacts Cargo
 make fclean     # clean + supprime le binaire local ./snake
 make purge      # fclean + supprime ./models
