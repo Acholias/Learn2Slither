@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/22 14:42:46 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/22 15:35:50 by lumugot          ###   ########.fr       //
+//   Updated: 2026/05/24 09:38:15 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -119,10 +119,5 @@ pub fn	handle_debug_key(runtime: &mut Runtime)
 	if is_key_pressed(KeyCode::D)
 	{
 		runtime.show_logs = !runtime.show_logs;
-	}
-
-	if is_key_pressed(KeyCode::H)
-	{
-		runtime.show_help = !runtime.show_help;
 	}
 }

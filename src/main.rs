@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 19:09:13 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/23 12:59:07 by lumugot          ###   ########.fr       //
+//   Updated: 2026/05/24 09:35:20 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,7 +24,7 @@ mod agent;
 mod train;
 mod cli;
 mod logger;
-mod stats;
+mod game_stats;
 mod runtime;
 mod input;
 mod hud;

@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/10 18:15:37 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/26 10:27:31 by lumugot          ###   ########.fr       //
+//   Updated: 2026/05/24 09:34:29 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -74,7 +74,7 @@ fn	draw_apple(x: f32, y: f32, color: Color)
 
 	draw_circle(cx - r * 0.3, cy - r * 0.33, r * 0.2, Color::new(1.0, 1.0, 1.0, 0.4));
 
-	draw_line(cx, y + 8.0, cx + 5.0, y + 3.0, 2.0, Color::new(0.4, 0.25, 0.1, 1.0));
+	draw_line(cx, y + 11.2, cx + 9.0, y + 2.0, 2.0, Color::new(0.4, 0.25, 0.1, 1.0));
 
 	draw_circle(cx + 6.0, y + 4.0, 4.0, Color::new(0.2, 0.7, 0.2, 1.0));
 }

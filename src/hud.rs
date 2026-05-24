@@ -6,14 +6,14 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/22 14:46:43 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/29 20:38:50 by lumugot          ###   ########.fr       //
+//   Updated: 2026/05/24 09:41:07 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 use macroquad::prelude::*;
 use crate::board::{Board, Direction};
 use crate::runtime::Runtime;
-use crate::stats::Stats;
+use crate::game_stats::Stats;
 use crate::logger::{ANSI_CYAN, ANSI_RESET};
 use crate::state::compute_vision;
 use crate::display::{draw_board, panel_left_x, panel_padding};
@@ -88,8 +88,6 @@ pub fn draw_mode_status(runtime: &Runtime)
 
 pub fn draw_help_menu(runtime: &Runtime)
 {
-	if !runtime.show_help { return ; }
-
 	let fs = 22.0;
 	let line = 26.0;
 	let pad = panel_padding();
@@ -103,7 +101,6 @@ pub fn draw_help_menu(runtime: &Runtime)
 	draw_rectangle(x - 10.0, y - 22.0, w + 20.0, h + 70.0, Color::new(0.0, 0.0, 0.0, 0.75));
 
 	let mut ty = y;
-	draw_text("CONTROLS (H to close)", x, ty, fs, WHITE);				ty += line;
 	draw_text("TAB    : toggle AI (before start)", x, ty, fs, WHITE);	ty += line;
 	draw_text("ENTER  : start / pause", x, ty, fs, WHITE);				ty += line;
 	draw_text("ARROWS : start + move (Player)", x, ty, fs, WHITE);		ty += line;

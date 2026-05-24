@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/22 14:39:05 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/29 20:52:53 by lumugot          ###   ########.fr       //
+//   Updated: 2026/05/24 09:37:42 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -31,7 +31,6 @@ pub struct Runtime {
 	pub steps_since_food: u32,
 	pub show_vision: bool,
 	pub show_logs: bool,
-	pub show_help: bool,
 	pub should_quit: bool,
 }
 
@@ -56,7 +55,6 @@ impl Runtime {
 			steps_since_food: 0,
 			show_vision: false,
 			show_logs: false,
-			show_help: true,
 			should_quit: false,
 		};
 
@@ -75,7 +73,6 @@ impl Runtime {
 		self.steps_since_food = 0;
 		self.started = started;
 		self.paused = false;
-		self.show_help = true;
 	}
 
 	pub fn set_ai_speed_max(&mut self)

@@ -6,7 +6,7 @@
 //   By: lumugot <lumugot@42angouleme.fr>           +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2026/04/22 14:50:38 by lumugot           #+#    #+#             //
-//   Updated: 2026/04/29 21:01:48 by lumugot          ###   ########.fr       //
+//   Updated: 2026/05/24 09:35:24 by lumugot          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,7 +16,7 @@ use crate::agent::Agent;
 use crate::board::StepResult;
 use crate::cli::Cli;
 use crate::runtime::Runtime;
-use crate::stats::Stats;
+use crate::game_stats::Stats;
 use crate::input::*;
 use crate::cli::Mode;
 use crate::state::compute_state;
